@@ -4,10 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Twitch Chat</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Set background color to black */
+        body {
+            background-color: #36393f;
+            color: #fff; /* Set text color to white */
+        }
+        /* Set background color of tabs to black */
+        .nav-tabs .nav-link {
+            color: #fff; /* Set text color to white */
+        }
+        /* Set background color of active tab to darker black */
+        .nav-tabs .nav-link.active {
+            background-color: #000;
+        }
+        /* Set text color of active tab to white */
+        .nav-tabs .nav-link.active {
+            color: #fff;
+        }
+        /* Set background color of tab content to black */
+        .tab-content {
+            color: #fff; /* Set text color to white */
+        }
+
+        #chatWindow {
+            background-color:gray;
+            width: 25%;
+            height: 100%;
+        }
+    </style>
 </head>
 <body>
-    <div id="chat"></div>
-    <h1>TwitchUp</h1>
+    <div class="container mt-5">
+        <!-- Tab navigation -->
+        <ul class="nav nav-tabs" id="settingsTabs">
+            <li class="nav-item">
+                <a class="nav-link active" id="chat-tab" data-toggle="tab" href="#chat" role="tab" aria-controls="chat" aria-selected="true">Chat</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="configurations-tab" data-toggle="tab" href="#configurations" role="tab" aria-controls="configurations" aria-selected="false">Configurations</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="appearance-tab" data-toggle="tab" href="#appearance" role="tab" aria-controls="appearance" aria-selected="false">Appearance</a>
+            </li>
+            <!-- Add more tabs as needed -->
+        </ul>
+
+        <!-- Tab content -->
+        <div class="tab-content" id="settingsContent">
+            <!-- Chat settings -->
+            <div class="tab-pane fade show active" id="chat" role="tabpanel" aria-labelledby="chat-tab">
+
+                <div id="chatWindow"></div>
+
+
+
+
+
+
+
+
+
+            </div>
+
+            <!-- Configurations settings -->
+            <div class="tab-pane fade" id="configurations" role="tabpanel" aria-labelledby="configurations-tab">
+                <h3>Configurations Settings</h3>
+                <p>This is where you can configure configurations settings.</p>
+            </div>
+
+            <!-- Appearance settings -->
+            <div class="tab-pane fade" id="appearance" role="tabpanel" aria-labelledby="appearance-tab">
+                <h3>Appearance Settings</h3>
+                <p>This is where you can configure appearance settings.</p>
+            </div>
+            <!-- Add more tab panes as needed -->
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (Optional, for toggling tabs) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
     <script>
         const socket = new WebSocket('ws://localhost:3000');
 
@@ -16,17 +97,18 @@
         });
 
         socket.addEventListener('message', function (event) {
-            console.log('Received message from server:', event.data);
             const { channel, tags, message: msg } = JSON.parse(event.data);
             renderMessage({ channel, tags, message: msg });
         });
 
         function renderMessage({ channel, tags, message }) {
-            const chatDiv = document.getElementById('chat');
+            const chatDiv = document.getElementById('chatWindow');
             const messageElement = document.createElement('div');
             messageElement.textContent = `${tags['display-name']}: ${message}`;
             chatDiv.appendChild(messageElement);
         }
     </script>
+
+
 </body>
 </html>
