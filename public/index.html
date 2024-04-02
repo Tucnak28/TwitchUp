@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitch Chat</title>
+</head>
+<body>
+    <div id="chat"></div>
+    <h1>TwitchUp</h1>
+    <script>
+        const socket = new WebSocket('ws://localhost:3000');
+
+        socket.addEventListener('open', function (event) {
+            console.log('WebSocket connection established');
+        });
+
+        socket.addEventListener('message', function (event) {
+            console.log('Received message from server:', event.data);
+            const { channel, tags, message: msg } = JSON.parse(event.data);
+            renderMessage({ channel, tags, message: msg });
+        });
+
+        function renderMessage({ channel, tags, message }) {
+            const chatDiv = document.getElementById('chat');
+            const messageElement = document.createElement('div');
+            messageElement.textContent = `${tags['display-name']}: ${message}`;
+            chatDiv.appendChild(messageElement);
+        }
+    </script>
+</body>
+</html>
