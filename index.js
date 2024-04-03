@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 const http = require('http').Server(app);
+const tmi = require('tmi.js');
+const WebSocket = require('ws');
 
 // Serve static files from the 'public' directory
 app.use(express.static('public'));
@@ -10,7 +12,7 @@ http.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
-const tmi = require('tmi.js');
+
 
 const ircClient = new tmi.Client({
     options: { debug: true },
@@ -22,12 +24,13 @@ const ircClient = new tmi.Client({
         username: 'bobicek588',
         password: 'oauth:jcwpsb1qokm3318l5sep4e53c4pbri'
     },
-    channels: ['#magnetfreespin']
+    channels: ['#labtipper']
 });
 
 ircClient.connect();
 
-const WebSocket = require('ws');
+
+
 const wss = new WebSocket.Server({ server: http });
 
 // Handle incoming WebSocket connections from clients
@@ -36,8 +39,13 @@ wss.on('connection', function connection(ws) {
 
     // Handle incoming messages from the client
     ws.on('message', function incoming(message) {
-        console.log('Received message from client:', message);
-        // Handle incoming message from client here
+        // Convert the received message buffer to a string
+        const messageString = message.toString('utf8');
+
+        console.log('Received message from client:', messageString);
+
+        // Here you can send the message to your IRC client
+        ircClient.say(ircClient.channels.toString(), messageString);
     });
 });
 

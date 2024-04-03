@@ -151,6 +151,8 @@
                         </div>
                     </div>
                 </div>
+
+
                 <!-- Styled chat window -->
                 <div id="chatWindow" class="chat-window">
                     <!-- Sample chat messages -->  <!--
@@ -193,41 +195,6 @@
 
         socket.addEventListener('open', function (event) {
             console.log('WebSocket connection established');
-
-
-
-            
-            // Get the checkbox element
-            const toggleUserSelectCheckbox = document.getElementById('toggleUserSelect');
-
-            // Get the checkbox element
-            const toggleMessageSelectCheckbox = document.getElementById('toggleMessageSelect');
-
-            // Get the elements you want to toggle user-select on/off
-
-            // Add event listener to the checkbox
-            toggleUserSelectCheckbox.addEventListener('change', function() {
-                // If the checkbox is checked, enable user-select
-                const chatNickElements = document.querySelectorAll('.chat-nick');
-
-                // Otherwise, disable user-select
-                const userSelectValue = this.checked ? 'auto' : 'none';
-                chatNickElements.forEach(function(element) {
-                    element.style.userSelect = userSelectValue;
-                });
-            });
-
-            toggleMessageSelectCheckbox.addEventListener('change', function() {
-                // If the checkbox is checked, enable user-select
-                const chatNickElements = document.querySelectorAll('.chat-content');
-
-                // Otherwise, disable user-select
-                const userSelectValue = this.checked ? 'auto' : 'none';
-                chatNickElements.forEach(function(element) {
-                    element.style.userSelect = userSelectValue;
-                });
-            });
-
         });
 
 
@@ -235,6 +202,39 @@
             const { channel, tags, message: msg } = JSON.parse(event.data);
             renderMessage({ channel, tags, message: msg });
         });
+
+
+        // Get the checkbox element
+        const toggleUserSelectCheckbox = document.getElementById('toggleUserSelect');
+
+        // Get the checkbox element
+        const toggleMessageSelectCheckbox = document.getElementById('toggleMessageSelect');
+
+        // Get the elements you want to toggle user-select on/off
+
+        // Add event listener to the checkbox
+        toggleUserSelectCheckbox.addEventListener('change', function() {
+            // If the checkbox is checked, enable user-select
+            const chatNickElements = document.querySelectorAll('.chat-nick');
+
+            // Otherwise, disable user-select
+            const userSelectValue = this.checked ? 'auto' : 'none';
+            chatNickElements.forEach(function(element) {
+                element.style.userSelect = userSelectValue;
+            });
+        });
+
+        toggleMessageSelectCheckbox.addEventListener('change', function() {
+            // If the checkbox is checked, enable user-select
+            const chatNickElements = document.querySelectorAll('.chat-content');
+
+            // Otherwise, disable user-select
+            const userSelectValue = this.checked ? 'auto' : 'none';
+            chatNickElements.forEach(function(element) {
+                element.style.userSelect = userSelectValue;
+            });
+        });
+
 
         function renderMessage({ channel, tags, message }) {
             const chatDiv = document.getElementById('chatWindow');
@@ -257,6 +257,23 @@
             // Append the message container to the chat window
             chatDiv.appendChild(messageContainer);
         }
+
+        // Add event listener for "Send" button click
+        document.getElementById('sendButton').addEventListener('click', function() {
+            // Get the value of the message input
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim(); // Trim whitespace from the message
+
+            // Check if the message is not empty
+            if (message !== '') {
+                // Send the message to the server via WebSocket
+                socket.send(message);
+
+                // Clear the input field after sending the message
+                messageInput.value = '';
+            }
+        });
+
 
     </script>
 
