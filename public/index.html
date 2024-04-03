@@ -29,11 +29,35 @@
             color: #fff; /* Set text color to white */
         }
 
-        #chatWindow {
-            background-color:gray;
-            width: 25%;
-            height: 100%;
+        .chat-window {
+            overflow-y: auto; /* Enable vertical scrolling */
+            max-height: 50%; /* Set maximum height */
+            border: 1px solid #ccc; /* Add border */
+            padding: 10px; /* Add padding */
         }
+
+        .chat-message {
+            margin-bottom: 10px; /* Add spacing between messages */
+            display: flex; /* Use flexbox for layout */
+            align-items: center; /* Align items vertically */
+        }
+
+        .chat-nick {
+            min-width: 100px; /* Set minimum width for nickname column */
+            font-weight: bold; /* Bold sender name */
+            color: #ac0ab8; /* Dark color for sender name */
+            margin-right: 10px; /* Add spacing between nickname and message content */
+            user-select: none;
+        }
+
+        .chat-content {
+            flex-grow: 1; /* Allow message content to grow and fill remaining space */
+            color: #ffffff; /* Color for message content */
+            border-left: 1px solid #ccc; /* Add left border to separate nickname and message content */
+            padding-left: 10px; /* Add padding for readability */
+        }
+
+
     </style>
 </head>
 <body>
@@ -56,18 +80,31 @@
         <div class="tab-content" id="settingsContent">
             <!-- Chat settings -->
             <div class="tab-pane fade show active" id="chat" role="tabpanel" aria-labelledby="chat-tab">
-
-                <div id="chatWindow"></div>
-
-
-
-
-
-
-
-
-
+                <div id="messageWindow">
+                    <!-- Styled input box -->
+                    <div class="input-group mb-3">
+                        <input id="messageInput" type="text" class="form-control" placeholder="Type your message here..." aria-label="Type your message here..." aria-describedby="sendButton">
+                        <div class="input-group-append">
+                            <button id="sendButton" class="btn btn-primary" type="button">Send</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Styled chat window -->
+                <div id="chatWindow" class="chat-window">
+                    <!-- Sample chat messages -->  <!--
+                    <div class="chat-message">
+                        <div class="chat-nick">John:</div>
+                        <div class="chat-content">Hello!</div>
+                    </div>
+                    <div class="chat-message">
+                        <div class="chat-nick">Jane:</div>
+                        <div class="chat-content">Hi there!</div>
+                    </div>
+                    -->
+                    <!-- Add more chat messages here -->
+                </div>
             </div>
+            
 
             <!-- Configurations settings -->
             <div class="tab-pane fade" id="configurations" role="tabpanel" aria-labelledby="configurations-tab">
@@ -103,10 +140,26 @@
 
         function renderMessage({ channel, tags, message }) {
             const chatDiv = document.getElementById('chatWindow');
-            const messageElement = document.createElement('div');
-            messageElement.textContent = `${tags['display-name']}: ${message}`;
-            chatDiv.appendChild(messageElement);
+            const messageContainer = document.createElement('div');
+            messageContainer.classList.add('chat-message');
+
+            // Create elements for the nickname and message content
+            const nickElement = document.createElement('span');
+            nickElement.classList.add('chat-nick');
+            nickElement.textContent = tags['display-name'];
+
+            const messageContentElement = document.createElement('span');
+            messageContentElement.classList.add('chat-content');
+            messageContentElement.textContent = message;
+
+            // Append nickname and message content to the message container
+            messageContainer.appendChild(nickElement);
+            messageContainer.appendChild(messageContentElement);
+
+            // Append the message container to the chat window
+            chatDiv.appendChild(messageContainer);
         }
+
     </script>
 
 

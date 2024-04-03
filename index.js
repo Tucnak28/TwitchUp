@@ -22,7 +22,7 @@ const ircClient = new tmi.Client({
         username: 'bobicek588',
         password: 'oauth:jcwpsb1qokm3318l5sep4e53c4pbri'
     },
-    channels: ['#labtipper']
+    channels: ['#magnetfreespin']
 });
 
 ircClient.connect();
@@ -43,9 +43,7 @@ wss.on('connection', function connection(ws) {
 
 // Broadcast messages from Twitch IRC to all connected clients
 ircClient.on('message', (channel, tags, message, self) => {
-    console.log("before");
     wss.clients.forEach(wsClient => {
-        console.log("after");
         if (wsClient.readyState === WebSocket.OPEN) {
             console.log('Sending message to client:', message);
             wsClient.send(JSON.stringify({ channel, tags, message }));
