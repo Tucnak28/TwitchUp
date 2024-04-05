@@ -107,6 +107,10 @@
             line-height: 1.5;
         }
 
+        th {
+            color: white;
+        }
+
 
     </style>
 
@@ -123,6 +127,9 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link" id="appearance-tab" data-toggle="tab" href="#appearance" role="tab" aria-controls="appearance" aria-selected="false">Appearance</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="accounts-tab" data-toggle="tab" href="#accounts" role="tab" aria-controls="accounts" aria-selected="false">Accounts</a>
             </li>
             <!-- Add more tabs as needed -->
         </ul>
@@ -181,7 +188,22 @@
                 <h3>Appearance Settings</h3>
                 <p>This is where you can configure appearance settings.</p>
             </div>
-            <!-- Add more tab panes as needed -->
+
+            <div class="tab-pane fade" id="accounts" role="tabpanel" aria-labelledby="accounts-tab">
+                <h3>Accounts</h3>
+                <table id="accountsTable" class="table">
+                    <thead>
+                        <tr>
+                            <th>Nickname</th>
+                            <th>Token</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Account information will be dynamically added here -->
+                    </tbody>
+                </table>
+            </div>
+
         </div>
     </div>
 
@@ -276,7 +298,6 @@
 
 
     </script>
-
 
 </body>
 </html>
