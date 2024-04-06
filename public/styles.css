@@ -22,6 +22,21 @@ body {
     color: #fff; /* Set text color to white */
 }
 
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    border-radius: 5px;
+    z-index: 9999;
+    opacity: 0; /* Initially hide toast */
+    transition: opacity 0.5s ease-in-out; /* Smooth transition for opacity change */
+}
+
+
+
 .chat-window {
     overflow-y: auto; /* Enable vertical scrolling */
     max-height: 50%; /* Set maximum height */
@@ -149,4 +164,19 @@ th {
     text-align: center;
     display: block; /* Change the display property to block */
     margin: 0 auto; /* Set margin to auto to horizontally center the input elements */
+}
+
+#saveButton {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+#saveButton:hover {
+    background-color: #45a049;
 }

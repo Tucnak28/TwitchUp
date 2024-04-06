@@ -80,3 +80,54 @@ document.getElementById('sendButton').addEventListener('click', function() {
         messageInput.value = '';
     }
 });
+
+function showToast(title, text, color) {
+    console.log('Showing toast:', title, text, color);
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.classList.add('toast');
+    toast.textContent = title + ': ' + text;
+    toast.style.backgroundColor = color; // Set background color
+
+    // Find toast container
+    const container = document.getElementById('toastContainer');
+    if (!container) {
+        console.error('Toast container not found');
+        return; // Exit function if container not found
+    }
+
+    // Append toast to container
+    container.appendChild(toast);
+
+    // Calculate margin for toast
+    const toastMargin = toast.offsetHeight+10; // Adjust as needed
+
+    // Position toast vertically
+    const numToasts = container.children.length;
+    const totalMargin = (numToasts - 1) * toastMargin;
+    toast.style.marginTop = `${totalMargin}px`;
+
+    // Show toast
+    setTimeout(() => {
+        toast.style.opacity = '1'; // Trigger fade-in transition
+
+        // Automatically remove toast after fade-out
+        setTimeout(() => {
+            if (toast.parentNode === container) {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    container.removeChild(toast);
+                    console.log('Toast removed');
+                }, 500); // Transition duration
+            } else {
+                console.error('Failed to remove toast from container');
+            }
+        }, 3000); // Display duration + transition duration
+    }, 100); // Delay before showing toast
+}
+
+
+
+
+
