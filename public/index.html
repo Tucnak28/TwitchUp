@@ -4,117 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Twitch Chat</title>
+
+
+
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        /* Set background color to black */
-        body {
-            background-color: #36393f;
-            color: #fff; /* Set text color to white */
-        }
-        /* Set background color of tabs to black */
-        .nav-tabs .nav-link {
-            color: #fff; /* Set text color to white */
-        }
-        /* Set background color of active tab to darker black */
-        .nav-tabs .nav-link.active {
-            background-color: #000;
-        }
-        /* Set text color of active tab to white */
-        .nav-tabs .nav-link.active {
-            color: #fff;
-        }
-        /* Set background color of tab content to black */
-        .tab-content {
-            color: #fff; /* Set text color to white */
-        }
 
-        .chat-window {
-            overflow-y: auto; /* Enable vertical scrolling */
-            max-height: 50%; /* Set maximum height */
-            border: 1px solid #ccc; /* Add border */
-            padding: 10px; /* Add padding */
-        }
+    <link rel="stylesheet" href="styles.css">
 
-        .chat-message {
-            margin-bottom: 10px; /* Add spacing between messages */
-            display: flex; /* Use flexbox for layout */
-            align-items: center; /* Align items vertically */
-        }
+    <script src="script.js"></script>
 
-        .chat-nick {
-            min-width: 100px; /* Set minimum width for nickname column */
-            font-weight: bold; /* Bold sender name */
-            color: #ac0ab8; /* Dark color for sender name */
-            margin-right: 10px; /* Add spacing between nickname and message content */
-
-        }
-
-        .chat-content {
-            flex-grow: 1; /* Allow message content to grow and fill remaining space */
-            color: #ffffff; /* Color for message content */
-            border-left: 1px solid #ccc; /* Add left border to separate nickname and message content */
-            padding-left: 10px; /* Add padding for readability */
-        }
-
-        /* Hide the default checkbox */
-        .styled-checkbox {
-            opacity: 0;
-            position: absolute;
-            cursor: pointer;
-        }
-
-        /* Style the label to look like a checkbox */
-        .checkbox-label {
-            position: relative;
-            padding-left: 25px;
-            cursor: pointer;
-            user-select: none;
-            margin-right: 50px;
-        }
-
-        /* Create the checkmark */
-        .checkbox-label:before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 18px;
-            height: 18px;
-            border: 2px solid #999;
-            border-radius: 3px;
-        }
-
-        /* Style the checkmark when the checkbox is checked */
-        .styled-checkbox:checked + .checkbox-label:before {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-
-
-
-        /* Show the checkmark icon when the checkbox is checked */
-        .styled-checkbox:checked + .checkbox-label:after {
-            display: block;
-        }
-
-        /* Style the checkbox wrapper */
-        .checkbox-wrapper {
-            display: inline-block;
-            position: relative;
-            margin-right: 10px;
-            margin-top: 10px;
-            line-height: 1.5;
-        }
-
-        th {
-            color: white;
-        }
-
-
-    </style>
+    <!-- Bootstrap JS (Optional, for toggling tabs) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
 
 </head>
+
 <body>
     <div class="container mt-5">
         <!-- Tab navigation -->
@@ -136,19 +43,18 @@
 
         <!-- Tab content -->
         <div class="tab-content" id="settingsContent">
-            <!-- Chat settings -->
-            <!-- Checkbox to toggle user-select -->
-            <!-- Styled checkbox -->
-            <div class="checkbox-wrapper">
-                <input type="checkbox" id="toggleUserSelect" class="styled-checkbox" checked>
-                <label for="toggleUserSelect" class="checkbox-label">Nick Selection</label>
-
-                <input type="checkbox" id="toggleMessageSelect" class="styled-checkbox" checked>
-                <label for="toggleMessageSelect" class="checkbox-label">Message Selection</label>
-
-            </div>
 
             <div class="tab-pane fade show active" id="chat" role="tabpanel" aria-labelledby="chat-tab">
+
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="toggleUserSelect" class="styled-checkbox" checked>
+                    <label for="toggleUserSelect" class="checkbox-label">Nick Selection</label>
+    
+                    <input type="checkbox" id="toggleMessageSelect" class="styled-checkbox" checked>
+                    <label for="toggleMessageSelect" class="checkbox-label">Message Selection</label>
+    
+                </div>
+
                 <div id="messageWindow">
                     <!-- Styled input box -->
                     <div class="input-group mb-3">
@@ -207,97 +113,7 @@
         </div>
     </div>
 
-    <!-- Bootstrap JS (Optional, for toggling tabs) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    <script>
-        const socket = new WebSocket('ws://localhost:3000');
-
-        socket.addEventListener('open', function (event) {
-            console.log('WebSocket connection established');
-        });
-
-
-        socket.addEventListener('message', function (event) {
-            const { channel, tags, message: msg } = JSON.parse(event.data);
-            renderMessage({ channel, tags, message: msg });
-        });
-
-
-        // Get the checkbox element
-        const toggleUserSelectCheckbox = document.getElementById('toggleUserSelect');
-
-        // Get the checkbox element
-        const toggleMessageSelectCheckbox = document.getElementById('toggleMessageSelect');
-
-        // Get the elements you want to toggle user-select on/off
-
-        // Add event listener to the checkbox
-        toggleUserSelectCheckbox.addEventListener('change', function() {
-            // If the checkbox is checked, enable user-select
-            const chatNickElements = document.querySelectorAll('.chat-nick');
-
-            // Otherwise, disable user-select
-            const userSelectValue = this.checked ? 'auto' : 'none';
-            chatNickElements.forEach(function(element) {
-                element.style.userSelect = userSelectValue;
-            });
-        });
-
-        toggleMessageSelectCheckbox.addEventListener('change', function() {
-            // If the checkbox is checked, enable user-select
-            const chatNickElements = document.querySelectorAll('.chat-content');
-
-            // Otherwise, disable user-select
-            const userSelectValue = this.checked ? 'auto' : 'none';
-            chatNickElements.forEach(function(element) {
-                element.style.userSelect = userSelectValue;
-            });
-        });
-
-
-        function renderMessage({ channel, tags, message }) {
-            const chatDiv = document.getElementById('chatWindow');
-            const messageContainer = document.createElement('div');
-            messageContainer.classList.add('chat-message');
-
-            // Create elements for the nickname and message content
-            const nickElement = document.createElement('span');
-            nickElement.classList.add('chat-nick');
-            nickElement.textContent = tags['display-name'];
-
-            const messageContentElement = document.createElement('span');
-            messageContentElement.classList.add('chat-content');
-            messageContentElement.textContent = message;
-
-            // Append nickname and message content to the message container
-            messageContainer.appendChild(nickElement);
-            messageContainer.appendChild(messageContentElement);
-
-            // Append the message container to the chat window
-            chatDiv.appendChild(messageContainer);
-        }
-
-        // Add event listener for "Send" button click
-        document.getElementById('sendButton').addEventListener('click', function() {
-            // Get the value of the message input
-            const messageInput = document.getElementById('messageInput');
-            const message = messageInput.value.trim(); // Trim whitespace from the message
-
-            // Check if the message is not empty
-            if (message !== '') {
-                // Send the message to the server via WebSocket
-                socket.send(message);
-
-                // Clear the input field after sending the message
-                messageInput.value = '';
-            }
-        });
-
-
-    </script>
 
 </body>
 </html>

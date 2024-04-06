@@ -1,0 +1,105 @@
+
+
+/* Set background color to black */
+body {
+    background-color: #36393f;
+    color: #fff; /* Set text color to white */
+}
+/* Set background color of tabs to black */
+.nav-tabs .nav-link {
+    color: #fff; /* Set text color to white */
+}
+/* Set background color of active tab to darker black */
+.nav-tabs .nav-link.active {
+    background-color: #000;
+}
+/* Set text color of active tab to white */
+.nav-tabs .nav-link.active {
+    color: #fff;
+}
+/* Set background color of tab content to black */
+.tab-content {
+    color: #fff; /* Set text color to white */
+}
+
+.chat-window {
+    overflow-y: auto; /* Enable vertical scrolling */
+    max-height: 50%; /* Set maximum height */
+    border: 1px solid #ccc; /* Add border */
+    padding: 10px; /* Add padding */
+}
+
+.chat-message {
+    margin-bottom: 10px; /* Add spacing between messages */
+    display: flex; /* Use flexbox for layout */
+    align-items: center; /* Align items vertically */
+}
+
+.chat-nick {
+    min-width: 100px; /* Set minimum width for nickname column */
+    font-weight: bold; /* Bold sender name */
+    color: #ac0ab8; /* Dark color for sender name */
+    margin-right: 10px; /* Add spacing between nickname and message content */
+
+}
+
+.chat-content {
+    flex-grow: 1; /* Allow message content to grow and fill remaining space */
+    color: #ffffff; /* Color for message content */
+    border-left: 1px solid #ccc; /* Add left border to separate nickname and message content */
+    padding-left: 10px; /* Add padding for readability */
+}
+
+/* Hide the default checkbox */
+.styled-checkbox {
+    opacity: 0;
+    position: absolute;
+    cursor: pointer;
+}
+
+/* Style the label to look like a checkbox */
+.checkbox-label {
+    position: relative;
+    padding-left: 25px;
+    cursor: pointer;
+    user-select: none;
+    margin-right: 50px;
+}
+
+/* Create the checkmark */
+.checkbox-label:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #999;
+    border-radius: 3px;
+}
+
+/* Style the checkmark when the checkbox is checked */
+.styled-checkbox:checked + .checkbox-label:before {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+
+
+/* Show the checkmark icon when the checkbox is checked */
+.styled-checkbox:checked + .checkbox-label:after {
+    display: block;
+}
+
+/* Style the checkbox wrapper */
+.checkbox-wrapper {
+    display: inline-block;
+    position: relative;
+    margin-right: 10px;
+    margin-top: 10px;
+    line-height: 1.5;
+}
+
+th {
+    color: white;
+}
