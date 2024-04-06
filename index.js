@@ -3,6 +3,7 @@ const app = express();
 const http = require('http').Server(app);
 const tmi = require('tmi.js');
 const WebSocket = require('ws');
+const fs = require('fs'); // Import the 'fs' module to read the JSON file
 
 // Serve static files from the 'public' directory
 app.use(express.static('public'));
@@ -14,6 +15,13 @@ http.listen(PORT, () => {
 
 
 
+// Read the JSON file containing IRC client configurations
+const ircConfigs = JSON.parse(fs.readFileSync('accounts.json', 'utf-8'));
+
+// Extract the first IRC client configuration from the array
+const firstConfig = ircConfigs[1];
+
+// Initialize the IRC client with the first configuration
 const ircClient = new tmi.Client({
     options: { debug: true },
     connection: {
@@ -21,8 +29,8 @@ const ircClient = new tmi.Client({
         reconnect: true
     },
     identity: {
-        username: 'bobicek588',
-        password: 'oauth:jcwpsb1qokm3318l5sep4e53c4pbri'
+        username: firstConfig.nickname,
+        password: firstConfig.token
     },
     channels: ['#labtipper']
 });
@@ -57,4 +65,13 @@ ircClient.on('message', (channel, tags, message, self) => {
             wsClient.send(JSON.stringify({ channel, tags, message }));
         }
     });
+});
+
+app.get('/configs', (req, res) => {
+    // Read the IRC client configurations from the file or database
+    // For example, assuming 'ircConfigs' contains your configurations
+    // const ircConfigs = ...; // Read configurations from file or database
+
+    // Send the configurations as a JSON response
+    res.json(ircConfigs);
 });

@@ -103,3 +103,50 @@ body {
 th {
     color: white;
 }
+
+
+/* Table style */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+/* Table header style */
+.table th {
+    color: #dee2e6;
+    padding: 8px;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Table row style */
+.table tr {
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* Table cell style */
+.table td {
+    padding: 8px;
+}
+
+/* Alternate row color */
+.table tbody .account:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+/* Hover effect */
+.table tbody .account:hover {
+    background-color: #e9ecef;
+}
+
+#accountsTable th, #accountsTable td,  #accountsTable tr {
+    text-align: center;
+}
+
+#accountsTable input {
+    width: 70%;
+    text-align: center;
+    display: block; /* Change the display property to block */
+    margin: 0 auto; /* Set margin to auto to horizontally center the input elements */
+}
