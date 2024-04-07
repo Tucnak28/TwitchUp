@@ -81,6 +81,18 @@ document.getElementById('sendButton').addEventListener('click', function() {
     }
 });
 
+// Get the input box element
+const messageInput = document.getElementById('messageInput');
+
+// Add event listener for the keydown event
+messageInput.addEventListener('keydown', function(event) {
+    // Check if the key pressed is Enter
+    if (event.key === 'Enter') {
+        // Trigger the action for sending the message
+        sendButton.click(); // Assuming sendButton is the ID of your send button
+    }
+});
+
 function showToast(title, text, color) {
     console.log('Showing toast:', title, text, color);
 
