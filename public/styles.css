@@ -180,3 +180,105 @@ th {
 #saveButton:hover {
     background-color: #45a049;
 }
+
+#activeAccButton {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    display: flex; /* Use flexbox */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    font-size: 20px; /* Adjust font-size as needed */
+    line-height: 40px; /* Center the icon vertically */
+    width: 40px; /* Set width to make it square */
+    height: 40px; /* Set height to make it square */
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+    outline: none; /* Remove outline on focus */
+}
+
+#activeAccButton:hover {
+    background-color: #45a049; /* Darker green */
+}
+
+.retractable-panel {
+    transition: width 0.3s ease, opacity 0.3s ease; /* Add opacity transition */
+    width: 15%; /* Initial width */
+    opacity: 1; /* Initial opacity */
+    overflow: hidden; /* Hide overflow content */
+    padding: 0;
+}
+
+.retracted {
+    width: 0; /* Set width to 0 when retracted */
+    padding: 0; /* Remove any padding */
+    margin: 0; /* Remove any margin */
+    opacity: 0; /* Set opacity to 0 when retracted */
+}
+
+
+.nickname-item {
+    padding: 1.5vw; /* Add padding relative to viewport width */
+    cursor: pointer; /* Cursor style */
+    transition: background-color 0.3s ease; /* Transition effect */
+    text-align: center;
+    font-size: 1.5vw; /* Set font size relative to viewport width */
+}
+
+.nickname-item:hover {
+    background-color: #e0e0e0; /* Background color on hover */
+    color: #000;
+}
+
+#nicknameListContainer {
+    max-height: 100vh; /* Set max height to 80% of viewport height */
+    width: 100%;
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.selected {
+    background-color: #ccc; /* Change background color to indicate selection */
+    color: #000; /* Change text color */
+}
+
+
+
+/*On/Off button for accounts*/
+
+/* CSS for the toggle button */
+.toggle-button {
+    background-color: #ccc; /* Default background color */
+    border: none;
+    color: #fff; /* Default text color */
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* CSS for the toggle button when it's on */
+.toggle-button.on {
+    background-color: #4CAF50; /* Green background color */
+}
+
+/* CSS for the toggle button when it's off */
+.toggle-button.off {
+    background-color: #f44336; /* Red background color */
+}
+
+/* CSS for button text */
+.toggle-button span {
+    font-weight: bold;
+}
+
+/* CSS for button text when it's on */
+.toggle-button.on span {
+    color: #fff; /* White text color */
+}
+
+/* CSS for button text when it's off */
+.toggle-button.off span {
+    color: #000; /* Black text color */
+}

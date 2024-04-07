@@ -5,118 +5,128 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Twitch Chat</title>
 
-
-
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <!-- Tab navigation -->
+                <ul class="nav nav-tabs" id="settingsTabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="chat-tab" data-toggle="tab" href="#chat" role="tab" aria-controls="chat" aria-selected="true">Chat</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="configurations-tab" data-toggle="tab" href="#configurations" role="tab" aria-controls="configurations" aria-selected="false">Configurations</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="appearance-tab" data-toggle="tab" href="#appearance" role="tab" aria-controls="appearance" aria-selected="false">Appearance</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="accounts-tab" data-toggle="tab" href="#accounts" role="tab" aria-controls="accounts" aria-selected="false">Accounts</a>
+                    </li>
+                </ul>
+
+                <!-- Tab content -->
+                <div class="tab-content" id="settingsContent">
+                    <!-- Chat tab -->
+                    <div class="tab-pane fade show active" id="chat" role="tabpanel" aria-labelledby="chat-tab">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="toggleUserSelect" class="styled-checkbox" checked>
+                            <label for="toggleUserSelect" class="checkbox-label">Enable Nick Selection</label>
+
+                            <input type="checkbox" id="toggleMessageSelect" class="styled-checkbox" checked>
+                            <label for="toggleMessageSelect" class="checkbox-label">Enable Message Selection</label>
+                        </div>
+
+                        <div id="messageWindow">
+                            <!-- Styled input box -->
+                            <div class="input-group mb-3">
+                                <input id="messageInput" type="text" class="form-control" placeholder="Type your message here..." aria-label="Type your message here..." aria-describedby="sendButton">
+                                <div class="input-group-append">
+                                    <button id="sendButton" class="btn btn-primary" type="button">Send</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Styled chat window -->
+                        <div id="chatWindow" class="chat-window"></div>
+                    </div>
+
+                    <!-- Configurations tab -->
+                    <div class="tab-pane fade" id="configurations" role="tabpanel" aria-labelledby="configurations-tab">
+                        <h3>Configurations Settings</h3>
+                        <p>This is where you can configure configurations settings.</p>
+                    </div>
+
+                    <!-- Appearance tab -->
+                    <div class="tab-pane fade" id="appearance" role="tabpanel" aria-labelledby="appearance-tab">
+                        <h3>Appearance Settings</h3>
+                        <p>This is where you can configure appearance settings.</p>
+                    </div>
+
+                    <div class="tab-pane fade" id="accounts" role="tabpanel" aria-labelledby="accounts-tab">
+                        <h3>Accounts</h3>
+                        <table id="accountsTable" class="table">
+                            <thead>
+                                <tr>
+                                    <th>Nickname</th>
+                                    <th>Token</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                        <button onclick="saveAccounts()" id="saveButton">Save</button>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="activeAccButton" class="cool-button">
+                <i class="fas fa-user" style="font-size: 20px;"></i> <!-- Adjust font-size as needed -->
+            </button>
+
+            <!-- Retractable side panel -->
+            <div id="sidePanel" class="col-auto retractable-panel">
+                <div id="nicknameListContainer">
+                    <!-- List of nicknames -->
+                    <div class="nickname-item">Nickname 1</div>
+                    <div class="nickname-item">Nickname 2</div>
+                    <div class="nickname-item">Nickname 1</div>
+                    <div class="nickname-item">Nickname 2</div>
+                    <div class="nickname-item">Nickname 1</div>
+                    <div class="nickname-item">Nickname 2</div>
+                    <div class="nickname-item">Nickname 1</div>
+                    <div class="nickname-item">Nickname 2</div>
+                    <div class="nickname-item">Nickname 1</div>
+                    <div class="nickname-item">Nickname 2</div>
+                    <div class="nickname-item">Nickname 1</div>
+                    <div class="nickname-item">Nickname 2</div>
+                    <div class="nickname-item">Nickname 1</div>
+                    <div class="nickname-item">Nickname 2</div>
+                    <!-- Add more nickname items as needed -->
+                </div>
+            </div>
+
+        </div>
+    </div>
 
     <!-- Bootstrap JS (Optional, for toggling tabs) -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    
-
-</head>
-
-<body>
-    <div id="toastContainer"></div>
-    <div class="container mt-5">
-
-        <!-- Tab navigation -->
-        <ul class="nav nav-tabs" id="settingsTabs">
-            <li class="nav-item">
-                <a class="nav-link active" id="chat-tab" data-toggle="tab" href="#chat" role="tab" aria-controls="chat" aria-selected="true">Chat</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="configurations-tab" data-toggle="tab" href="#configurations" role="tab" aria-controls="configurations" aria-selected="false">Configurations</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="appearance-tab" data-toggle="tab" href="#appearance" role="tab" aria-controls="appearance" aria-selected="false">Appearance</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="accounts-tab" data-toggle="tab" href="#accounts" role="tab" aria-controls="accounts" aria-selected="false">Accounts</a>
-            </li>
-            <!-- Add more tabs as needed -->
-        </ul>
-
-        <!-- Tab content -->
-        <div class="tab-content" id="settingsContent">
-
-            <div class="tab-pane fade show active" id="chat" role="tabpanel" aria-labelledby="chat-tab">
-
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="toggleUserSelect" class="styled-checkbox" checked>
-                    <label for="toggleUserSelect" class="checkbox-label">Nick Selection</label>
-    
-                    <input type="checkbox" id="toggleMessageSelect" class="styled-checkbox" checked>
-                    <label for="toggleMessageSelect" class="checkbox-label">Message Selection</label>
-    
-                </div>
-
-                <div id="messageWindow">
-                    <!-- Styled input box -->
-                    <div class="input-group mb-3">
-                        <input id="messageInput" type="text" class="form-control" placeholder="Type your message here..." aria-label="Type your message here..." aria-describedby="sendButton">
-                        <div class="input-group-append">
-                            <button id="sendButton" class="btn btn-primary" type="button">Send</button>
-                        </div>
-                    </div>
-                </div>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 
-                <!-- Styled chat window -->
-                <div id="chatWindow" class="chat-window">
-                    <!-- Sample chat messages -->  <!--
-                    <div class="chat-message">
-                        <div class="chat-nick">John:</div>
-                        <div class="chat-content">Hello!</div>
-                    </div>
-                    <div class="chat-message">
-                        <div class="chat-nick">Jane:</div>
-                        <div class="chat-content">Hi there!</div>
-                    </div>
-                    -->
-                    <!-- Add more chat messages here -->
-                </div>
-            </div>
-            
-
-            <!-- Configurations settings -->
-            <div class="tab-pane fade" id="configurations" role="tabpanel" aria-labelledby="configurations-tab">
-                <h3>Configurations Settings</h3>
-                <p>This is where you can configure configurations settings.</p>
-            </div>
-
-            <!-- Appearance settings -->
-            <div class="tab-pane fade" id="appearance" role="tabpanel" aria-labelledby="appearance-tab">
-                <h3>Appearance Settings</h3>
-                <p>This is where you can configure appearance settings.</p>
-            </div>
-
-            <div class="tab-pane fade" id="accounts" role="tabpanel" aria-labelledby="accounts-tab">
-                <h3>Accounts</h3>
-                <table id="accountsTable" class="table">
-                    <thead>
-                        <tr>
-                            <th>Nickname</th>
-                            <th>Token</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                    </tbody>
-                </table>
-                <button onclick="saveAccounts()" id="saveButton">Save</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- Custom JS -->
+    <script src="script.js"></script>
+    <script src="fetching.js"></script>
+    <script src="accountManagement.js"></script>
 </body>
-
-
-<script src="script.js"></script>
-<script src="fetching.js"></script>
-
 </html>
