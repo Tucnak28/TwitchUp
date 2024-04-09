@@ -40,40 +40,19 @@ wss.on('connection', function connection(ws) {
 
 // Read the JSON file containing IRC client configurations
 let ircConfigs = JSON.parse(fs.readFileSync('accounts.json', 'utf-8'));
+const activeAcc = [];
 
-// Extract the first IRC client configuration from the array
-const firstConfig = ircConfigs[1];
-
-
-
-
-// Initialize the IRC client with the first configuration
-const ircClient = new tmi.Client({
-    options: { debug: true },
-    connection: {
-        secure: true,
-        reconnect: true
-    },
-    identity: {
-        username: firstConfig.nickname,
-        password: firstConfig.token
-    },
-    channels: ['#labtipper']
-});
-
-ircClient.connect();
-
-
+//activeAcc.forEach((acc) => {console.log(acc.getOptions().identity.username)})
 
 // Broadcast messages from Twitch IRC to all connected clients
-ircClient.on('message', (channel, tags, message, self) => {
+/*ircClient.on('message', (channel, tags, message, self) => {
     wss.clients.forEach(wsClient => {
         if (wsClient.readyState === WebSocket.OPEN) {
             console.log('Sending message to client:', message);
             wsClient.send(JSON.stringify({ channel, tags, message }));
         }
     });
-});
+});*/
 
 app.get('/loadConfigs', (req, res) => {
     // Read the IRC client configurations from the file or database
@@ -98,4 +77,80 @@ app.post('/saveConfigs', (req, res) => {
             res.send('Accounts saved successfully');
         }
     });
+});
+
+
+// Endpoint to toggle the connection status of an account
+app.post('/toggleConnection/:accountId', (req, res) => {
+    const accountId = req.params;
+
+    // Check if the account is already connected
+    const existingAccountIndex = activeAcc.findIndex(account => account.getUsername() === accountId.accountId);
+    if (existingAccountIndex !== -1) {
+        const existingAccount = activeAcc[existingAccountIndex];
+        
+        // Disconnect the existing account
+        existingAccount.disconnect();
+
+        // Remove the disconnected account from activeAcc array
+        activeAcc.splice(existingAccountIndex, 1);
+
+        // Log and send response
+        console.log(`Account ${existingAccount.getUsername()} disconnected`);
+        res.sendStatus(200);
+        return;
+    }
+
+    // If account is not already connected, connect it
+    const account = ircConfigs.find(config => config.nickname === accountId.accountId);
+    if (!account) {
+        console.error(`Account ${accountId.accountId} not found`);
+        res.sendStatus(404); // Account not found
+        return;
+    }
+
+    // Connect the new account
+    const accountClient = new tmi.Client({
+        options: { debug: true },
+        connection: {
+            secure: true,
+            reconnect: true
+        },
+        identity: {
+            username: account.nickname,
+            password: account.token
+        },
+        channels: ['#labtipper']
+    });
+
+    accountClient.connect();
+
+    accountClient.addListener('connected', (address, port) => {
+        console.log(`Account ${accountClient.getUsername()} connected`);
+        activeAcc.push(accountClient);
+    });
+
+    // Send a success response
+    res.sendStatus(200);
+});
+
+// Endpoint to periodically check the connection status of accounts
+app.get('/checkConnections', (req, res) => {
+    // Iterate over each account in activeAcc array
+    /*activeAcc.forEach((account, index) => {
+        // Check the connection status of the account
+        if (!account.ircClient || account.ircClient.readyState() == 'CLOSED') {
+            // If account is not connected, remove it from activeAcc array
+            activeAcc.splice(index, 1);
+        }
+    });*/
+
+
+    // Create an array of connected accounts
+    const connectedAccounts = activeAcc.map(account => ({
+        id: account.getUsername(),
+    }));
+
+    // Send the array of connected accounts as JSON response
+    res.json(connectedAccounts);
 });

@@ -250,7 +250,7 @@ th {
 
 /* CSS for the toggle button */
 .toggle-button {
-    background-color: #ccc; /* Default background color */
+    background-color: #f44336; /* Red background color */
     border: none;
     color: #fff; /* Default text color */
     padding: 5px 10px;
@@ -261,11 +261,6 @@ th {
 /* CSS for the toggle button when it's on */
 .toggle-button.on {
     background-color: #4CAF50; /* Green background color */
-}
-
-/* CSS for the toggle button when it's off */
-.toggle-button.off {
-    background-color: #f44336; /* Red background color */
 }
 
 /* CSS for button text */

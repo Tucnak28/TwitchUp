@@ -9,11 +9,12 @@ fetch('/loadConfigs') // Make a GET request to the '/configs' endpoint
             // Create a new <tr> element for each configuration
             const accountTr = document.createElement('tr');
 
-            // Create the <td> elements for nickname and token
+            // Create the <td> elements for nickname, token, and button
             const nicknameTd = document.createElement('td');
             const tokenTd = document.createElement('td');
+            const buttonTd = document.createElement('td');
 
-            // Create <input> elements and set their attributes
+            // Create <input> elements for nickname and token and set their attributes
             const nicknameInput = document.createElement('input');
             nicknameInput.setAttribute('type', 'text');
             nicknameInput.setAttribute('id', `Nickname${index + 1}`);
@@ -26,13 +27,30 @@ fetch('/loadConfigs') // Make a GET request to the '/configs' endpoint
             tokenInput.setAttribute('name', `Token${index + 1}`);
             tokenInput.value = config.token; // Set default value from the configuration
 
+            // Create a button element for each row
+            const toggleButton = document.createElement('button');
+            toggleButton.textContent = 'Toggle'; // Set button text
+            toggleButton.setAttribute('type', 'button');
+            toggleButton.classList.add('toggle-button'); // Add a class for styling
+            toggleButton.dataset.accountId = config.nickname; // Set data attribute to identify the account
+
+            // Add click event listener to toggle button
+            toggleButton.addEventListener('click', function() {
+                const accountId = this.dataset.accountId;
+                toggleAccountConnection(accountId, toggleButton);
+            });
+
             // Append the <input> elements to the corresponding <td> elements
             nicknameTd.appendChild(nicknameInput);
             tokenTd.appendChild(tokenInput);
 
+            // Append the toggle button to the button <td> element
+            buttonTd.appendChild(toggleButton);
+
             // Append the <td> elements to the <tr> element
             accountTr.appendChild(nicknameTd);
             accountTr.appendChild(tokenTd);
+            accountTr.appendChild(buttonTd);
 
             // Append the <tr> element to the <tbody> of the table
             tbody.appendChild(accountTr);
@@ -41,6 +59,28 @@ fetch('/loadConfigs') // Make a GET request to the '/configs' endpoint
     .catch(error => {
         console.error('Error fetching IRC configs:', error);
     });
+
+// Function to toggle the connection status of an account
+function toggleAccountConnection(accountId, button) {
+    fetch(`/toggleConnection/${accountId}`, { method: 'POST' })
+    .then(response => {
+        if (response.ok) {
+            // Toggle the CSS class based on the button's current state
+            button.classList.toggle('on');
+
+
+            showToast('Success', 'Account connection status updated successfully', 'green');
+        } else {
+            console.error('Failed to update account connection status');
+            showToast('Error', 'Failed to update account connection status', 'red');
+        }
+    })
+    .catch(error => {
+        console.error('Error updating account connection status:', error);
+        showToast('Error', 'Error updating account connection status', 'red');
+    });
+}
+
 
 
 function saveAccounts() {
@@ -81,5 +121,37 @@ function saveAccounts() {
         showToast('Error', 'Error saving accounts', 'red');
     });
 }
+
+
+// Function to fetch and check connections
+function checkConnections() {
+    fetch('/checkConnections')
+        .then(response => {
+            if (response.ok) {
+                console.log('Connections checked successfully');
+                // Parse the JSON response if needed
+                return response.json();
+            } else {
+                console.error('Failed to check connections');
+                throw new Error('Failed to check connections');
+            }
+        })
+        .then(data => {
+            // Process the data if needed
+            console.log(data);
+        })
+        .catch(error => {
+            console.error('Error checking connections:', error);
+        });
+}
+
+// Call the function initially
+//checkConnections();
+
+// Set up periodic fetching every 10 seconds (10000 milliseconds)
+const intervalId = setInterval(checkConnections, 1000);
     
+
+// To stop the periodic fetching, you can use clearInterval with the intervalId:
+// clearInterval(intervalId);
 

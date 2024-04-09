@@ -130,7 +130,6 @@ function showToast(title, text, color) {
                 toast.style.opacity = '0';
                 setTimeout(() => {
                     container.removeChild(toast);
-                    console.log('Toast removed');
                 }, 500); // Transition duration
             } else {
                 console.error('Failed to remove toast from container');
