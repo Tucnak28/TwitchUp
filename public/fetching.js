@@ -1,3 +1,5 @@
+let activeAcc = [];
+
 fetch('/loadConfigs') // Make a GET request to the '/configs' endpoint
     .then(response => response.json()) // Parse the JSON response
     .then(configs => {
@@ -122,6 +124,25 @@ function saveAccounts() {
     });
 }
 
+function populateNickPanel() {
+    const nicknameListContainer =  document.querySelector('#nicknameListContainer');
+
+    while (nicknameListContainer.firstChild) {
+        nicknameListContainer.removeChild(nicknameListContainer.firstChild);
+    }
+    
+    activeAcc.forEach(account => {
+        const accountDiv = document.createElement('div');
+
+        accountDiv.className = "nickname-item";
+        accountDiv.innerHTML = account.id;
+    
+        nicknameListContainer.appendChild(accountDiv);
+    });
+}
+
+
+
 
 // Function to fetch and check connections
 function checkConnections() {
@@ -139,6 +160,8 @@ function checkConnections() {
         .then(data => {
             // Process the data if needed
             console.log(data);
+            activeAcc = data;
+            populateNickPanel();
         })
         .catch(error => {
             console.error('Error checking connections:', error);
