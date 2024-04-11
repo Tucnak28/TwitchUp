@@ -74,7 +74,15 @@ document.getElementById('sendButton').addEventListener('click', function() {
     // Check if the message is not empty
     if (message !== '') {
         // Send the message to the server via WebSocket
-        socket.send(message);
+        const data = {
+            nickname: selectedNickname,
+            message: message
+        };
+
+        // Convert data object to a JSON string
+        const jsonString = JSON.stringify(data);
+        
+        socket.send(jsonString);
 
         // Clear the input field after sending the message
         messageInput.value = '';

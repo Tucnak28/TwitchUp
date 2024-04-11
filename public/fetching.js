@@ -153,6 +153,10 @@ function populateNickPanel() {
             accountDiv.className = "nickname-item";
             accountDiv.textContent = account.id;
             nicknameListContainer.appendChild(accountDiv);
+
+            accountDiv.addEventListener('click', () => {
+                selectNickname(accountDiv);
+            });
         }
     });
 }

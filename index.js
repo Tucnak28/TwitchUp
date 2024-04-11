@@ -12,6 +12,8 @@ app.use(bodyParser.json());
 
 const wss = new WebSocket.Server({ server: http });
 
+let mainIrcClient = null;
+
 
 const PORT = 3000;
 http.listen(PORT, () => {
@@ -26,9 +28,18 @@ wss.on('connection', function connection(ws) {
     ircConfigs = JSON.parse(fs.readFileSync('accounts.json', 'utf-8'));
 
     // Handle incoming messages from the client
-    ws.on('message', function incoming(message) {
-        // Convert the received message buffer to a string
-        const messageString = message.toString('utf8');
+    ws.on('message', function incoming(incomingData) {
+        const data = JSON.parse(incomingData);
+
+        const nickname = data.nickname;
+        const messageString = data.message;
+
+        const ircClient = activeAcc.find(account => account.getUsername().toLowerCase() === nickname.toLowerCase());
+        
+        if(!ircClient) {
+            console.log("account can't send message because it doesn't exist");
+            return;
+        }
 
         console.log('Received message from client:', messageString);
 
@@ -42,26 +53,12 @@ wss.on('connection', function connection(ws) {
 let ircConfigs = JSON.parse(fs.readFileSync('accounts.json', 'utf-8'));
 const activeAcc = [];
 
-//activeAcc.forEach((acc) => {console.log(acc.getOptions().identity.username)})
 
-// Broadcast messages from Twitch IRC to all connected clients
-/*ircClient.on('message', (channel, tags, message, self) => {
-    wss.clients.forEach(wsClient => {
-        if (wsClient.readyState === WebSocket.OPEN) {
-            console.log('Sending message to client:', message);
-            wsClient.send(JSON.stringify({ channel, tags, message }));
-        }
-    });
-});*/
 
 app.get('/loadConfigs', (req, res) => {
-    // Read the IRC client configurations from the file or database
-    // For example, assuming 'ircConfigs' contains your configurations
-    // const ircConfigs = ...; // Read configurations from file or database
-
-    // Send the configurations as a JSON response
     res.json(ircConfigs);
 });
+
 
 
 app.post('/saveConfigs', (req, res) => {
@@ -98,7 +95,7 @@ app.post('/toggleConnection/:accountId', (req, res) => {
 
         // Log and send response
         console.log(`Account ${existingAccount.getUsername()} disconnected`);
-
+        
         res.send("Disconnected");
         return;
     }
@@ -134,6 +131,8 @@ app.post('/toggleConnection/:accountId', (req, res) => {
 
         // Send a success response
         res.send("Connected");
+
+        if(mainIrcClient == null) selectMainIRCClient();
     });
 });
 
@@ -158,3 +157,42 @@ app.get('/checkConnections', (req, res) => {
     // Send the array of connected accounts as JSON response
     res.json(connectedAccounts);
 });
+
+
+
+
+// Function to select an active IRC client from activeAcc
+function selectMainIRCClient() {
+    console.log("hmmm");
+    // Loop through activeAcc to find an IRC client that is open
+    for (let i = 0; i < activeAcc.length; i++) {
+        console.log(activeAcc[i].getUsername());
+        if (activeAcc[i].readyState() == 'OPEN') {
+            // Set this IRC client as the main client for intercepting messages
+            mainIrcClient = activeAcc[i];
+            console.log(`Main IRC client selected: ${mainIrcClient.getUsername()}`);
+
+
+            // WebSocket event listener to monitor the state of the main IRC client
+            mainIrcClient.addListener('disconnected', (code, reason) => {
+                console.log(`Main IRC client disconnected with code ${code}: ${reason}`);
+                // Select a new main IRC client whenever the main client disconnects
+                selectMainIRCClient();
+            });
+
+            // Broadcast messages from Twitch IRC to all connected clients
+            mainIrcClient.on('message', (channel, tags, message, self) => {
+                wss.clients.forEach(wsClient => {
+                    if (wsClient.readyState === WebSocket.OPEN) {
+                        console.log('Sending message to client:', message);
+                        wsClient.send(JSON.stringify({ channel, tags, message }));
+                    }
+                });
+            })
+
+            return;
+        }
+    }
+    mainIrcClient = null;
+    console.log('No active IRC client found.');
+}
