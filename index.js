@@ -85,7 +85,8 @@ app.post('/toggleConnection/:accountId', (req, res) => {
     const accountId = req.params;
 
     // Check if the account is already connected
-    const existingAccountIndex = activeAcc.findIndex(account => account.getUsername() === accountId.accountId);
+    const existingAccountIndex = activeAcc.findIndex(account => account.getUsername().toLowerCase() === accountId.accountId.toLowerCase());
+
     if (existingAccountIndex !== -1) {
         const existingAccount = activeAcc[existingAccountIndex];
         
@@ -97,9 +98,11 @@ app.post('/toggleConnection/:accountId', (req, res) => {
 
         // Log and send response
         console.log(`Account ${existingAccount.getUsername()} disconnected`);
-        res.sendStatus(200);
+
+        res.send("Disconnected");
         return;
     }
+
 
     // If account is not already connected, connect it
     const account = ircConfigs.find(config => config.nickname === accountId.accountId);
@@ -128,22 +131,23 @@ app.post('/toggleConnection/:accountId', (req, res) => {
     accountClient.addListener('connected', (address, port) => {
         console.log(`Account ${accountClient.getUsername()} connected`);
         activeAcc.push(accountClient);
-    });
 
-    // Send a success response
-    res.sendStatus(200);
+        // Send a success response
+        res.send("Connected");
+    });
 });
 
 // Endpoint to periodically check the connection status of accounts
 app.get('/checkConnections', (req, res) => {
     // Iterate over each account in activeAcc array
-    /*activeAcc.forEach((account, index) => {
+    activeAcc.forEach((account, index) => {
         // Check the connection status of the account
-        if (!account.ircClient || account.ircClient.readyState() == 'CLOSED') {
+        if (!account || account.readyState() == 'CLOSED') {
             // If account is not connected, remove it from activeAcc array
             activeAcc.splice(index, 1);
+            console.log("removed: " + account.getUsername());
         }
-    });*/
+    });
 
 
     // Create an array of connected accounts

@@ -25,7 +25,7 @@ body {
 .toast {
     position: fixed;
     top: 20px;
-    right: 20px;
+    right: 40%;
     padding: 10px;
     background-color: rgba(0, 0, 0, 0.7);
     color: white;

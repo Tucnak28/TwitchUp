@@ -134,7 +134,7 @@ function showToast(title, text, color) {
             } else {
                 console.error('Failed to remove toast from container');
             }
-        }, 3000); // Display duration + transition duration
+        }, 1000); // Display duration + transition duration
     }, 100); // Delay before showing toast
 }
 

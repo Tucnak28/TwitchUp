@@ -62,17 +62,25 @@ fetch('/loadConfigs') // Make a GET request to the '/configs' endpoint
         console.error('Error fetching IRC configs:', error);
     });
 
-// Function to toggle the connection status of an account
 function toggleAccountConnection(accountId, button) {
     fetch(`/toggleConnection/${accountId}`, { method: 'POST' })
     .then(response => {
-        if (response.ok) {
-            // Toggle the CSS class based on the button's current state
-            button.classList.toggle('on');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.text(); // This returns a promise containing the text value
+    })
+    .then(statusText => {
+        console.log("Status Text: " + statusText);
 
-
-            showToast('Success', 'Account connection status updated successfully', 'green');
+        if (statusText === "Connected") {
+            button.classList.add('on');
+            showToast('Success', 'Account connected successfully', 'green');
+        } else if (statusText === "Disconnected") {
+            button.classList.remove('on');
+            showToast('Success', 'Account disconnected successfully', 'green');
         } else {
+            button.classList.remove('on');
             console.error('Failed to update account connection status');
             showToast('Error', 'Failed to update account connection status', 'red');
         }
@@ -82,6 +90,7 @@ function toggleAccountConnection(accountId, button) {
         showToast('Error', 'Error updating account connection status', 'red');
     });
 }
+    
 
 
 
@@ -125,19 +134,26 @@ function saveAccounts() {
 }
 
 function populateNickPanel() {
-    const nicknameListContainer =  document.querySelector('#nicknameListContainer');
+    const nicknameListContainer = document.querySelector('#nicknameListContainer');
 
-    while (nicknameListContainer.firstChild) {
-        nicknameListContainer.removeChild(nicknameListContainer.firstChild);
-    }
-    
+    // Store the IDs of existing nickname items
+    const existingNicknames = new Set(Array.from(nicknameListContainer.children).map(child => child.textContent));
+
+    // Remove any existing nickname items that are no longer present in activeAcc
+    nicknameListContainer.childNodes.forEach(node => {
+        if (!activeAcc.find(account => account.id === node.textContent)) {
+            nicknameListContainer.removeChild(node);
+        }
+    });
+
+    // Add new nickname items for any active accounts that are not already displayed
     activeAcc.forEach(account => {
-        const accountDiv = document.createElement('div');
-
-        accountDiv.className = "nickname-item";
-        accountDiv.innerHTML = account.id;
-    
-        nicknameListContainer.appendChild(accountDiv);
+        if (!existingNicknames.has(account.id)) {
+            const accountDiv = document.createElement('div');
+            accountDiv.className = "nickname-item";
+            accountDiv.textContent = account.id;
+            nicknameListContainer.appendChild(accountDiv);
+        }
     });
 }
 
