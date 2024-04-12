@@ -13,6 +13,7 @@ app.use(bodyParser.json());
 const wss = new WebSocket.Server({ server: http });
 
 let mainIrcClient = null;
+let connectedChannel = '#labtipper';
 
 
 const PORT = 3000;
@@ -120,12 +121,14 @@ app.post('/toggleConnection/:accountId', (req, res) => {
             username: account.nickname,
             password: account.token
         },
-        channels: ['#labtipper']
+        channels: [connectedChannel]
     });
 
     accountClient.connect();
 
-    accountClient.addListener('connected', (address, port) => {
+
+
+    accountClient.once('connected', (address, port) => {
         console.log(`Account ${accountClient.getUsername()} connected`);
         activeAcc.push(accountClient);
 
@@ -133,6 +136,8 @@ app.post('/toggleConnection/:accountId', (req, res) => {
         res.send("Connected");
 
         if(mainIrcClient == null) selectMainIRCClient();
+
+
     });
 });
 
@@ -159,6 +164,32 @@ app.get('/checkConnections', (req, res) => {
 });
 
 
+app.post('/reconnectAccounts', (req, res) => {
+    const { channel } = req.body; // Extract the channel from the request body
+
+    connectedChannel = channel;
+
+    // Reconnect all accounts to the specified channel
+    activeAcc.forEach(account => {
+        console.log("Before");
+        console.log(account);
+
+        account.part(account.getChannels());
+        // Assuming `account` is an IRC client instance
+        account.join(channel); // Rejoin the specified channel
+
+        console.log("AFTTERERERERREERRE");
+        console.log(account);
+
+
+    });
+
+    // Send a success response
+    res.sendStatus(200);
+});
+
+
+
 
 
 // Function to select an active IRC client from activeAcc
@@ -174,7 +205,7 @@ function selectMainIRCClient() {
 
 
             // WebSocket event listener to monitor the state of the main IRC client
-            mainIrcClient.addListener('disconnected', (code, reason) => {
+            mainIrcClient.once('disconnected', (code, reason) => {
                 console.log(`Main IRC client disconnected with code ${code}: ${reason}`);
                 // Select a new main IRC client whenever the main client disconnects
                 selectMainIRCClient();

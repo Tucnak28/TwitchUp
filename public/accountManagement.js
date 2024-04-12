@@ -35,4 +35,31 @@ togglePanelButton.addEventListener('click', () => {
 });
 
 
+const channelConnectButton = document.getElementById('channelButton');
+
+channelConnectButton.addEventListener('click', () => {
+    const channelInput = document.getElementById('channelInput').value; // Get the value of the input field
+
+    fetch('/reconnectAccounts', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ channel: channelInput }) // Send the channel input as JSON in the request body
+    })
+    .then(response => {
+        if (response.ok) {
+            // Show a success message or perform any other actions upon successful response
+            console.log('Accounts reconnected successfully to channel:', channelInput);
+        } else {
+            console.error('Failed to reconnect accounts');
+            // Handle the failure scenario as needed
+        }
+    })
+    .catch(error => {
+        console.error('Error reconnecting accounts:', error);
+        // Handle any errors that occur during the request
+    });
+});
+
 

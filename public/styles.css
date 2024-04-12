@@ -228,6 +228,25 @@ th {
     font-size: 1.5vw; /* Set font size relative to viewport width */
 }
 
+#channelInput {
+    text-align: center;
+    width: 100%;
+    margin: 0;
+
+}
+
+#channelButton {
+    text-align: center;
+    width: 100%;
+    font-size: 1vw;
+    margin: 0;
+    user-select: none;
+    outline: none;
+    
+}
+
+
+
 .nickname-item:hover {
     background-color: #e0e0e0; /* Background color on hover */
     color: #000;
