@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 const wss = new WebSocket.Server({ server: http });
 
 let mainIrcClient = null;
-let connectedChannel = '#labtipper';
+let connectedChannel = null;
 
 
 const PORT = 3000;
@@ -171,17 +171,14 @@ app.post('/reconnectAccounts', (req, res) => {
 
     // Reconnect all accounts to the specified channel
     activeAcc.forEach(account => {
-        console.log("Before");
-        console.log(account);
 
-        account.part(account.getChannels());
+        //leave every channel it is joined in
+        account.getChannels().forEach(channel => {
+            account.part(channel);
+        });
+        
         // Assuming `account` is an IRC client instance
         account.join(channel); // Rejoin the specified channel
-
-        console.log("AFTTERERERERREERRE");
-        console.log(account);
-
-
     });
 
     // Send a success response
@@ -194,7 +191,6 @@ app.post('/reconnectAccounts', (req, res) => {
 
 // Function to select an active IRC client from activeAcc
 function selectMainIRCClient() {
-    console.log("hmmm");
     // Loop through activeAcc to find an IRC client that is open
     for (let i = 0; i < activeAcc.length; i++) {
         console.log(activeAcc[i].getUsername());
