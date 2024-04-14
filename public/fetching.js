@@ -31,7 +31,7 @@ fetch('/loadConfigs') // Make a GET request to the '/configs' endpoint
 
             // Create a button element for each row
             const toggleButton = document.createElement('button');
-            toggleButton.textContent = 'Toggle'; // Set button text
+            toggleButton.textContent = 'Connect'; // Set button text
             toggleButton.setAttribute('type', 'button');
             toggleButton.classList.add('toggle-button'); // Add a class for styling
             toggleButton.dataset.accountId = config.nickname; // Set data attribute to identify the account
@@ -179,6 +179,7 @@ function checkConnections() {
         .then(data => {
             activeAcc = data;
             populateNickPanel();
+            fetchActiveAccounts();
         })
         .catch(error => {
             console.error('Error checking connections:', error);

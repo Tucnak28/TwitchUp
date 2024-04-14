@@ -296,3 +296,56 @@ th {
 .toggle-button.off span {
     color: #000; /* Black text color */
 }
+
+
+
+
+
+/* Style for WordDetection tab */
+#WordDetection {
+    padding: 20px;
+}
+
+/* Style for active accounts list */
+#activeAccountsList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Style for each account settings */
+.accountSettings {
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.accountSettings h4 {
+    margin-top: 0;
+}
+
+.settingsList {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.settingsList li {
+    margin-bottom: 10px;
+    margin-right: 20px; /* Add margin between input pairs */
+}
+
+.settingsList li label {
+    font-weight: bold;
+    margin-right: 5px;
+    width: 120px; /* Set a fixed width for labels */
+}
+
+.settingsList li input {
+    width: 100px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}

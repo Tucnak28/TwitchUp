@@ -23,7 +23,7 @@
                         <a class="nav-link active" id="chat-tab" data-toggle="tab" href="#chat" role="tab" aria-controls="chat" aria-selected="true">Chat</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="configurations-tab" data-toggle="tab" href="#configurations" role="tab" aria-controls="configurations" aria-selected="false">Configurations</a>
+                        <a class="nav-link" id="WordDetection-tab" data-toggle="tab" href="#WordDetection" role="tab" aria-controls="WordDetection" aria-selected="false">Word Detection</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="appearance-tab" data-toggle="tab" href="#appearance" role="tab" aria-controls="appearance" aria-selected="false">Appearance</a>
@@ -59,10 +59,16 @@
                         <div id="chatWindow" class="chat-window"></div>
                     </div>
 
-                    <!-- Configurations tab -->
-                    <div class="tab-pane fade" id="configurations" role="tabpanel" aria-labelledby="configurations-tab">
-                        <h3>Configurations Settings</h3>
-                        <p>This is where you can configure configurations settings.</p>
+                    <!-- WordDetection tab -->
+                    <div class="tab-pane fade" id="WordDetection" role="tabpanel" aria-labelledby="WordDetection-tab">
+                        <h3>Word Detection Settings</h3>
+                        <p>On every occurrence of word there will be an action.</p>
+                        
+                        <div id="activeAccountsList">
+                            <!-- Active accounts and their word counters will be appended here -->
+                        </div>
+                        
+                        <button id="saveButton">Save</button>
                     </div>
 
                     <!-- Appearance tab -->
@@ -119,5 +125,6 @@
     <script src="script.js"></script>
     <script src="fetching.js"></script>
     <script src="accountManagement.js"></script>
+    <script src="wordCounter.js"></script>
 </body>
 </html>

@@ -22,13 +22,74 @@ http.listen(PORT, () => {
     
 });
 
+class WordCounter {
+    constructor(word_detect, word_write, threshold, timeWindow, repeat, wait, cooldown, ircClient) {
+        this.word_detect = word_detect;
+        this.word_write = word_write;
+        this.threshold = threshold;
+        this.timeWindow = timeWindow;
+        this.repeat = repeat;
+        this.wait = wait;
+        this.cooldown = cooldown;
+        this.counter = 0;
+        this.timer = null;
+        this.ircClient = ircClient;
+    }
+
+    incrementCounter() {
+        this.counter++;
+        console.log(`Counter incremented: ${this.counter}`);
+
+        // Check if the threshold is reached
+        if (this.counter >= this.threshold) {
+            this.triggerAction();
+        }
+    }
+
+    triggerAction() {
+        console.log(`Threshold reached: ${this.threshold} occurrences of "${this.word_detect}"`);
+
+        // Send the message to the IRC client's channels
+        this.ircClient.say(this.ircClient.channels.toString(), this.word_detect);
+
+        // Perform the action here, e.g., write the word
+        this.resetCounter();
+    }
+
+    resetCounter() {
+        this.counter = 0;
+        console.log('Counter reset');
+        clearTimeout(this.timer);
+        // Set a timer to reset the counter after the time window
+        this.timer = setTimeout(() => {
+            console.log('Timer expired. Counter reset.');
+            this.counter = 0;
+        }, this.timeWindow);
+    }
+
+    processWord(inputWord) {
+        // Check if the input word matches the target word
+        if (inputWord === this.word_detect) {
+            // Increment the counter and reset timer
+            this.incrementCounter();
+            clearTimeout(this.timer);
+            this.timer = setTimeout(() => {
+                console.log('Timer expired. Counter reset.');
+                this.counter = 0;
+            }, this.timeWindow);
+        }
+    }
+}
+
+
+
 // Handle incoming WebSocket connections from clients
 wss.on('connection', function connection(ws) {
     console.log('WebSocket client connected');
 
     ircConfigs = JSON.parse(fs.readFileSync('accounts.json', 'utf-8'));
 
-    // Handle incoming messages from the client
+    /*// Handle incoming messages from the client
     ws.on('message', function incoming(incomingData) {
         const data = JSON.parse(incomingData);
 
@@ -46,7 +107,7 @@ wss.on('connection', function connection(ws) {
 
         // Here you can send the message to your IRC client
         ircClient.say(ircClient.channels.toString(), messageString);
-    });
+    });*/
 });
 
 
@@ -169,9 +230,10 @@ app.post('/toggleConnection/:accountId', (req, res) => {
         channels: [connectedChannel]
     });
 
+    // Create and attach wordCounter object to the accountClient
+    //accountClient.wordCounter = new WordCounter('example', 3, 15000, 0, accountClient);
+
     accountClient.connect();
-
-
 
     accountClient.once('connected', (address, port) => {
         console.log(`Account ${accountClient.getUsername()} connected`);
@@ -238,7 +300,6 @@ app.post('/reconnectAccounts', (req, res) => {
 function selectMainIRCClient() {
     // Loop through activeAcc to find an IRC client that is open
     for (let i = 0; i < activeAcc.length; i++) {
-        console.log(activeAcc[i].getUsername());
         if (activeAcc[i].readyState() == 'OPEN') {
             // Set this IRC client as the main client for intercepting messages
             mainIrcClient = activeAcc[i];
@@ -254,12 +315,25 @@ function selectMainIRCClient() {
 
             // Broadcast messages from Twitch IRC to all connected clients
             mainIrcClient.on('message', (channel, tags, message, self) => {
+                // Ignore echoed messages.
+                //if(self) return;
+
                 wss.clients.forEach(wsClient => {
                     if (wsClient.readyState === WebSocket.OPEN) {
                         console.log('Sending message to client:', message);
                         wsClient.send(JSON.stringify({ channel, tags, message }));
                     }
-                });
+                });  
+
+                const activeUsernames = new Set(activeAcc.map(ircClient => ircClient.getUsername()));
+
+                // Check if the channel is not in activeAcc
+                if (!activeUsernames.has(tags['display-name'])) {
+                    // Process the word using the wordCounter for each account in activeAcc
+                    activeAcc.forEach(ircClient => {
+                        //ircClient.wordCounter.processWord(message);
+                    });
+                }
             })
 
             return;
