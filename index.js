@@ -55,6 +55,51 @@ let ircConfigs = JSON.parse(fs.readFileSync('accounts.json', 'utf-8'));
 const activeAcc = [];
 
 
+app.post('/sendMessage', (req, res) => {
+    const { nickname, message } = req.body;
+
+    if (nickname == null || message == null) {
+        return res.status(400).send('Invalid request: Missing nickname or message');
+    }
+
+    // Find the IRC client corresponding to the provided nickname
+    const ircClient = activeAcc.find(account => account.getUsername().toLowerCase() === nickname.toLowerCase());
+
+    if (!ircClient) {
+        // If the IRC client doesn't exist, send a 404 response to the client
+        console.log(`Account "${nickname}" not found. Message not sent.`);
+        return res.status(404).send("Account not found");
+    }
+
+    console.log(`Received message from client for account "${nickname}": ${message}`);
+
+    // Flag to track whether a notice was received
+    let noticeReceived = '';
+
+    // Listen for notices from the IRC client
+    ircClient.once('notice', (channel, tags, noticeMessage) => {
+        // When a notice is received, set the flag and do not send a response
+        noticeReceived = noticeMessage;
+    });
+
+    // Send the message to the IRC client's channels
+    ircClient.say(ircClient.channels.toString(), message);
+
+    // Send a success response back to the client
+    console.log(`Message sent to account "${nickname}" successfully.`);
+    
+
+    // After sending the response, if a notice was received, send it as a separate response
+    setTimeout(() => {
+        if (noticeReceived != '') {
+            res.status(300).send(noticeReceived);
+        } else {
+            res.sendStatus(200);
+        }
+    }, 500);
+});
+
+
 
 app.get('/loadConfigs', (req, res) => {
     res.json(ircConfigs);

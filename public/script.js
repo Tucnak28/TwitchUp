@@ -71,22 +71,45 @@ document.getElementById('sendButton').addEventListener('click', function() {
     const messageInput = document.getElementById('messageInput');
     const message = messageInput.value.trim(); // Trim whitespace from the message
 
-    // Check if the message is not empty
-    if (message !== '') {
-        // Send the message to the server via WebSocket
-        const data = {
-            nickname: selectedNickname,
-            message: message
-        };
+    if (message === '') return;
 
-        // Convert data object to a JSON string
-        const jsonString = JSON.stringify(data);
-        
-        socket.send(jsonString);
+    messageInput.value = '';
 
-        // Clear the input field after sending the message
-        messageInput.value = '';
-    }
+    const data = {
+        nickname: selectedNickname,
+        message: message
+    };
+
+
+    fetch('/sendMessage', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        if (response.ok) {
+            showToast('Success', 'Message sent successfully', 'green');
+        } else if (response.status === 300) {
+
+            // Handle notice received
+            response.text().then(noticeMessage => {
+                // Process notice message here
+                console.log('Notice received: ', noticeMessage, '\nmessage: ', message, '\nnickname: ', selectedNickname);
+                showToast('Notice Received', noticeMessage, 'blue');
+            });
+
+        } else {
+            console.error('Failed to send message');
+            showToast('Error', 'Failed to send message', 'red');
+        }
+    })
+    .catch(error => {
+        console.error('Error sending message:', error);
+        showToast('Error', 'Error sending message', 'red');
+    });
+    
 });
 
 // Get the input box element

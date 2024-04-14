@@ -169,7 +169,6 @@ function checkConnections() {
     fetch('/checkConnections')
         .then(response => {
             if (response.ok) {
-                console.log('Connections checked successfully');
                 // Parse the JSON response if needed
                 return response.json();
             } else {
@@ -178,8 +177,6 @@ function checkConnections() {
             }
         })
         .then(data => {
-            // Process the data if needed
-            console.log(data);
             activeAcc = data;
             populateNickPanel();
         })
