@@ -346,6 +346,66 @@ th {
 .settingsList li input {
     width: 100px;
     padding: 5px;
-    border: 1px solid #ccc;
+    border: 0px solid #ccc;
     border-radius: 3px;
+}
+
+/* Word Detection Settings */
+#activeAccountsWordCounter {
+    max-width: 200px;
+    margin-bottom: 20px;
+}
+
+
+#activeAccountsWordCounter td {
+    padding: 6px;
+    text-align: left;
+    font-size: 0.8vw;
+}
+
+/* Style for table headers */
+.word-counters-table th {
+    padding: 10px;
+    text-align: left;
+    font-size: 0.9vw;
+}
+
+/* Style for table data cells */
+.word-counters-table td {
+    padding: 5px;
+    text-align: left;
+    border-bottom: 1px solid #ccc; /* Gray border bottom */
+}
+
+.word-counter-remove {
+    background-color: #dc3545;
+    color: white;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Style for add button */
+.add-button {
+    background-color: #007bff; /* Blue */
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 0.8vw;
+    margin: 8px 0;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.add-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+.word-counter-remove:hover {
+    background-color: #c82333;
 }

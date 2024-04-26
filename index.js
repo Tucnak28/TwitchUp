@@ -50,7 +50,7 @@ class WordCounter {
         console.log(`Threshold reached: ${this.threshold} occurrences of "${this.word_detect}"`);
 
         // Send the message to the IRC client's channels
-        this.ircClient.say(this.ircClient.channels.toString(), this.word_detect);
+        this.ircClient.say(this.ircClient.channels.toString(), this.word_write);
 
         // Perform the action here, e.g., write the word
         this.resetCounter();
@@ -273,6 +273,45 @@ app.post('/reconnectAccounts', (req, res) => {
     res.sendStatus(200);
 });
 
+app.post('/connectWordCounters', (req, res) => {
+    // Extract the settings from the request body
+    const wordCounters = req.body.word_counters;
+
+    // Log the settings
+    console.log('Word Counters Settings:');
+    wordCounters.forEach((counter, index) => {
+        const { nickname, word_detect, word_write, threshold, timeWindow, repeat, wait, cooldown } = counter;
+        console.log(`Counter ${index + 1}:`);
+        console.log(`Nickname: ${nickname}`);
+        console.log(`Word to Detect: ${word_detect}`);
+        console.log(`Word to Write: ${word_write}`);
+        console.log(`Threshold: ${threshold}`);
+        console.log(`Time Window: ${timeWindow}`);
+        console.log(`Repeat: ${repeat}`);
+        console.log(`Wait: ${wait}`);
+        console.log(`Cooldown: ${cooldown}`);
+        console.log('\n');
+
+
+
+        // Find the connected account
+        const existingAccountIndex = activeAcc.findIndex(account => account.getUsername().toLowerCase() === nickname.toLowerCase());
+
+        if (existingAccountIndex !== -1) {
+            const account = activeAcc[existingAccountIndex];
+
+            account.wordCounter = new WordCounter(word_detect, word_write, threshold, timeWindow, repeat, wait, cooldown, account);
+            console.log(nickname + ": wordCounter Connected");
+        }
+    });
+
+    
+
+    
+
+    // Send a success response
+    res.sendStatus(200);
+});
 
 
 
@@ -312,7 +351,7 @@ function selectMainIRCClient() {
                 if (!activeUsernames.has(tags['display-name'])) {
                     // Process the word using the wordCounter for each account in activeAcc
                     activeAcc.forEach(ircClient => {
-                        //ircClient.wordCounter.processWord(message);
+                        ircClient.wordCounter.processWord(message);
                     });
                 }
             })
