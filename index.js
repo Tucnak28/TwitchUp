@@ -300,7 +300,17 @@ app.post('/connectWordCounters', (req, res) => {
         if (existingAccountIndex !== -1) {
             const account = activeAcc[existingAccountIndex];
 
-            account.wordCounter = new WordCounter(word_detect, word_write, threshold, timeWindow, repeat, wait, cooldown, account);
+            if (!account.wordCounters) {
+                // If not, initialize it as an empty array
+                account.wordCounters = [];
+            }
+
+            // Create a new word counter object
+            const newWordCounter = new WordCounter(word_detect, word_write, threshold, timeWindow, repeat, wait, cooldown, account);
+
+            // Push the new word counter to the wordCounters array of the account
+            account.wordCounters.push(newWordCounter);  
+                      
             console.log(nickname + ": wordCounter Connected");
         }
     });
@@ -349,9 +359,18 @@ function selectMainIRCClient() {
 
                 // Check if the channel is not in activeAcc
                 if (!activeUsernames.has(tags['display-name'])) {
-                    // Process the word using the wordCounter for each account in activeAcc
                     activeAcc.forEach(ircClient => {
-                        ircClient.wordCounter.processWord(message);
+                        // Check if ircClient and ircClient.wordCounters are defined and wordCounters is an array
+                        if (ircClient && Array.isArray(ircClient.wordCounters)) {
+                            // Iterate over each word counter within the current active account
+                            ircClient.wordCounters.forEach(wordCounter => {
+                                // Check if wordCounter is defined
+                                if (wordCounter) {
+                                    // Process the word using the current word counter
+                                    wordCounter.processWord(message);
+                                }
+                            });
+                        }
                     });
                 }
             })
