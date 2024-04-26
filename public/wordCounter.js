@@ -1,24 +1,33 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Fetch list of active accounts from the server
-    fetchActiveAccounts();
-});
 
 // Function to fetch list of active accounts from the server
 function fetchActiveAccounts() {
-    // Simulated list of active accounts
-    //const activeAcc = [{ nickname: 'Account1' }, { nickname: 'Account2' }, { nickname: 'Account3' }];
+    const nicknameListContainer = document.querySelector('#activeAccountsWordCounter');
 
-    // Process the list of active accounts
+    // Store the IDs of existing nickname items
+    const existingNicknames = new Set(Array.from(nicknameListContainer.querySelectorAll('.account-name')).map(child => child.textContent));
+
+    console.log(existingNicknames);
+
+    // Remove any existing nickname items that are no longer present in activeAcc
+    nicknameListContainer.querySelectorAll('.account-name').forEach(node => {
+        //console.log(node);
+        if (!activeAcc.find(account => account.id === node.textContent)) {
+            nicknameListContainer.removeChild(node);
+        }
+    });
+
+    // Add new nickname items for any active accounts that are not already displayed
     activeAcc.forEach(account => {
-        // Create and append account settings form
-        createAccountSettings(account);
+        if (!existingNicknames.has(account.id)) {
+            createAccountSettings(account);
+        }
     });
 }
 
 // Function to create an account settings form
 function createAccountSettings(account) {
     // Get the container element
-    const container = document.getElementById('activeAccountsList');
+    const container = document.getElementById('activeAccountsWordCounter');
 
     // Create elements for the account settings
     const accountDiv = document.createElement('div');
@@ -26,7 +35,8 @@ function createAccountSettings(account) {
 
     // Create a span for the account name
     const accountName = document.createElement('span');
-    accountName.textContent = account.nickname;
+
+    accountName.textContent = account.id;
     accountName.classList.add('account-name');
 
     // Add click event listener to toggle word counters list
@@ -104,7 +114,6 @@ function createInput(type, placeholder, defaultValue) {
     }
     return input;
 }
-
 
 // Function to remove a word counter from the list
 function removeWordCounter(listItem) {

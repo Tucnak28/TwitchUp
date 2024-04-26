@@ -16,7 +16,7 @@ let mainIrcClient = null;
 let connectedChannel = null;
 
 
-const PORT = 3000;
+const PORT = 3069;
 http.listen(PORT, () => {
     console.log(`Server is running on port http://localhost:${PORT}`);
     
@@ -89,25 +89,6 @@ wss.on('connection', function connection(ws) {
 
     ircConfigs = JSON.parse(fs.readFileSync('accounts.json', 'utf-8'));
 
-    /*// Handle incoming messages from the client
-    ws.on('message', function incoming(incomingData) {
-        const data = JSON.parse(incomingData);
-
-        const nickname = data.nickname;
-        const messageString = data.message;
-
-        const ircClient = activeAcc.find(account => account.getUsername().toLowerCase() === nickname.toLowerCase());
-        
-        if(!ircClient) {
-            console.log("account can't send message because it doesn't exist");
-            return;
-        }
-
-        console.log('Received message from client:', messageString);
-
-        // Here you can send the message to your IRC client
-        ircClient.say(ircClient.channels.toString(), messageString);
-    });*/
 });
 
 
