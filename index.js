@@ -370,6 +370,38 @@ app.post('/connectWordCounters', (req, res) => {
     res.sendStatus(200);
 });
 
+// Endpoint to handle fetching word counters config for a specific account
+app.post('/fetchWordCountersConfig', (req, res) => {
+    // Extract the account ID or nickname from the request body
+    const { accountToFind } = req.body;
+
+    // Read the word counters configuration file
+    fs.readFile('wordCounters_config.json', 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading word counters configuration file:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        try {
+            // Parse the JSON data from the file
+            const config = JSON.parse(data);
+
+            // Check if the account exists in the configuration
+            if (config.accounts && config.accounts[accountToFind]) {
+                // Send the word counters configuration for the specified account
+                res.status(200).json(config.accounts[accountToFind].wordCounters);
+            } else {
+                // Account not found
+                res.status(404).json({ error: 'Account not found' });
+            }
+        } catch (error) {
+            console.error('Error parsing word counters configuration:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    });
+});
+
 
 
 app.post('/saveWordCounters', (req, res) => {

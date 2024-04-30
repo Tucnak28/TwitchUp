@@ -81,7 +81,45 @@ function createAccountSettings(account) {
 
     // Append the account div to the container
     container.appendChild(accountDiv);
+
+
+
+    const accountToFind = account.id; // Assuming you have the account ID or nickname
+
+    // Send a request to the server to fetch the word counters config for the specified account
+    fetch('/fetchWordCountersConfig', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ accountToFind })
+    })
+    .then(response => {
+        // Check if the response is successful
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        // Parse the JSON response
+        return response.json();
+    })
+    .then(wordCounters => {
+        // Check if word counters were found for the specified account
+        if (wordCounters && wordCounters.length > 0) {
+            // Assuming each word counter object has properties like word_detect, word_write, etc.
+            wordCounters.forEach(counter => {
+                const { word_detect, word_write, threshold, timeWindow, repeat, wait, cooldown } = counter;
+                // Add the word counter to the UI
+                addWordCounter(wordCountersList, word_detect, word_write, threshold, timeWindow, repeat, wait, cooldown);
+            });
+        } else {
+            console.log('No word counters found for the specified account');
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching word counters:', error);
+    });  
 }
+
 
 
 // Function to toggle the visibility of the word counters list
@@ -91,22 +129,21 @@ function toggleWordCountersList(accountDiv) {
 }
 
 // Function to add a new word counter to the list
-function addWordCounter(wordCountersList) {
+function addWordCounter(wordCountersList, word_detect = "", word_write = "", threshold = 3, timeWindow = 5000, repeat = 1, wait = 0, cooldown = 30000) {
     // Create a new table row for the word counter
     const newRow = document.createElement('tr');
 
     // Add input fields for word detection, word to write, threshold, time window, repeat, wait, and cooldown
     newRow.innerHTML = `
-        <td><input type="text" name="wordDetect" placeholder="Word to Detect"></td>
-        <td><input type="text" name="wordWrite" placeholder="Word to Write"></td>
-        <td><input type="number" name="threshold" value="1" min="1"></td>
-        <td><input type="number" name="timeWindow" value="5000" min="0"></td>
-        <td><input type="number" name="repeat" value="0" min="0"></td>
-        <td><input type="number" name="wait" value="0" min="0"></td>
-        <td><input type="number" name="cooldown" value="30000" min="0"></td>
+        <td><input type="text" name="wordDetect" placeholder="Word to Detect" value="${word_detect}"></td>
+        <td><input type="text" name="wordWrite" placeholder="Word to Write" value="${word_write}"></td>
+        <td><input type="number" name="threshold" value="${threshold}" min="1"></td>
+        <td><input type="number" name="timeWindow" value="${timeWindow}" min="0"></td>
+        <td><input type="number" name="repeat" value="${repeat}" min="0"></td>
+        <td><input type="number" name="wait" value="${wait}" min="0"></td>
+        <td><input type="number" name="cooldown" value="${cooldown}" min="0"></td>
         <td><button class="word-counter-remove">Remove</button></td>
     `;
-
 
     // Add event listener to remove button
     const removeButton = newRow.querySelector('.word-counter-remove');
@@ -115,6 +152,7 @@ function addWordCounter(wordCountersList) {
     // Append the new row to the table
     wordCountersList.insertBefore(newRow, wordCountersList.lastElementChild);
 }
+
 
 
 // Function to create an input field with label
