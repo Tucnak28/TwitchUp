@@ -5,6 +5,7 @@ const tmi = require('tmi.js');
 const WebSocket = require('ws');
 const fs = require('fs'); // Import the 'fs' module to read the JSON file
 const bodyParser = require('body-parser'); // Import bodyParser module
+const { randomInt } = require('crypto');
 
 // Serve static files from the 'public' directory
 app.use(express.static('public'));
@@ -60,7 +61,6 @@ class WordCounter {
 
     incrementCounter() {
         this.counter++;
-        console.log(`Counter incremented: ${this.counter}`);
 
         // Check if the threshold is reached
         if (this.counter >= this.threshold && !this.isOnCooldown) {
@@ -69,9 +69,15 @@ class WordCounter {
     }
 
     triggerAction() {
-        console.log(`Threshold reached: ${this.threshold} occurrences of "${this.word_detect}"`);
+        console.log(`${new Date()} detected "${this.word_detect}"`);
 
-        const textToSend = concatenateString(this.word_write, this.repeat);
+        let rndRepeat = this.repeat; // Default value if repeat is not -1
+
+        if (this.repeat == -1) {
+            rndRepeat = randomInt(8); // Assign random value if repeat is -1
+        }
+
+        const textToSend = concatenateString(this.word_write, rndRepeat);
 
         // Wait for the specified time before sending the message
         setTimeout(() => {
@@ -99,7 +105,6 @@ class WordCounter {
         clearTimeout(this.timer);
         // Set a timer to reset the counter after the time window
         this.timer = setTimeout(() => {
-            console.log('Timer expired. Counter reset.');
             this.counter = 0;
         }, this.timeWindow);
     }
