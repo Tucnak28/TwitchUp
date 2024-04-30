@@ -10,7 +10,10 @@ function fetchActiveAccounts() {
     // Remove any existing nickname items that are no longer present in activeAcc
     nicknameListContainer.querySelectorAll('.account-name').forEach(node => {
         if (!activeAcc.find(account => account.id === node.textContent)) {
-            nicknameListContainer.removeChild(node);
+            const accountDiv = node.closest('.account');
+            if (accountDiv) {
+                accountDiv.remove();
+            }
         }
     });
 
@@ -95,12 +98,16 @@ function createAccountSettings(account) {
         body: JSON.stringify({ accountToFind })
     })
     .then(response => {
-        // Check if the response is successful
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+        if (response.status === 204) {
+            console.log('No word counters found for the specified account');
+            // Display a notification or perform any other action to inform the user
+        } else if (response.ok) {
+            // Parse the JSON data if the response was successful and there is content to process
+            return response.json();
+        } else {
+            // Handle other non-successful responses
+            throw new Error('Failed to fetch word counters: ' + response.status);
         }
-        // Parse the JSON response
-        return response.json();
     })
     .then(wordCounters => {
         // Check if word counters were found for the specified account
@@ -210,18 +217,13 @@ function activateSettings() {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Failed to save settings');
+            console.error('Error activating settings:');
+            showToast('Error', 'Error activating settings', 'red');
+        } else {
+            console.log('Settings activated successfully:');
+            showToast('Success', 'Settings activated successfully', 'green');
         }
-        return response.json();
     })
-    .then(data => {
-        console.log('Settings activated successfully:', data);
-        showToast('Success', 'Settings activated successfully', 'green');
-    })
-    .catch(error => {
-        console.error('Error activating settings:', error);
-        showToast('Error', 'Error activating settings', 'red');
-    });
 }
 
 function saveConfigurations() {
@@ -256,7 +258,6 @@ function saveConfigurations() {
     })
     .catch(error => {
         console.error('Error saving settings:', error);
-        showToast('Error', 'Failed to save', 'red');
     });
 }
 

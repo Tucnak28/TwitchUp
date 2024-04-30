@@ -142,7 +142,7 @@ function populateNickPanel() {
     // Remove any existing nickname items that are no longer present in activeAcc
     nicknameListContainer.childNodes.forEach(node => {
         if (!activeAcc.find(account => account.id === node.textContent)) {
-            nicknameListContainer.removeChild(node);
+            node.remove(); // Use node.remove() instead of nicknameListContainer.removeChild(node)
         }
     });
 

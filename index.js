@@ -362,12 +362,8 @@ app.post('/connectWordCounters', (req, res) => {
         }
     });
 
-    
-
-    
-
     // Send a success response
-    res.sendStatus(200);
+    res.sendStatus(200).end();
 });
 
 // Endpoint to handle fetching word counters config for a specific account
@@ -392,8 +388,8 @@ app.post('/fetchWordCountersConfig', (req, res) => {
                 // Send the word counters configuration for the specified account
                 res.status(200).json(config.accounts[accountToFind].wordCounters);
             } else {
-                // Account not found
-                res.status(404).json({ error: 'Account not found' });
+                // Account not found, send a 204 No Content response
+                res.status(204).end();
             }
         } catch (error) {
             console.error('Error parsing word counters configuration:', error);
