@@ -143,68 +143,14 @@ function removeWordCounter(listItem) {
 
 document.addEventListener('DOMContentLoaded', function() {
     // Add event listener to the "Save" button
-    document.getElementById('saveButton').addEventListener('click', saveSettings);
+    document.getElementById('saveButton').addEventListener('click', activateSettings);
+    document.getElementById('saveConfigButton').addEventListener('click', saveConfigurations);
 });
 
 // Function to handle saving the settings
-function saveSettings() {
-    // Get the nickname of the account
-    const accountNames = document.querySelectorAll('.account-name');
-
-    // Initialize an array to store the settings for each word counter
-    const wordCounterSettings = [];
-
-    // Loop through each account
-    accountNames.forEach(accountNameElement => {
-        const accountName = accountNameElement.textContent.trim(); // Get the account name
-        
-        // Find the parent div with the class 'account'
-        const accountDiv = accountNameElement.closest('.account');
-        
-        // Select the table within the account div
-        const table = accountDiv.querySelector('.word-counters-table');
-        
-        if (!table) {
-            console.error('Table not found for account:', accountName);
-            return;
-        }
-
-        // Select all rows in the table
-        const rows = table.querySelectorAll('tbody tr');
-
-        // Loop through each row
-        rows.forEach((row, index) => {
-            // Select input fields in the row
-            const wordDetectInput = row.querySelector('input[name="wordDetect"]');
-            const wordWriteInput = row.querySelector('input[name="wordWrite"]');
-            const thresholdInput = row.querySelector('input[name="threshold"]');
-            const timeWindowInput = row.querySelector('input[name="timeWindow"]');
-            const repeatInput = row.querySelector('input[name="repeat"]');
-            const waitInput = row.querySelector('input[name="wait"]');
-            const cooldownInput = row.querySelector('input[name="cooldown"]');
-
-            // Check if any of the input fields are null
-            if (!wordDetectInput || !wordWriteInput || !thresholdInput || !timeWindowInput || !repeatInput || !waitInput || !cooldownInput) {
-                console.error(`One or more input fields are null in row ${index + 1} of account ${accountName}.`);
-                return;
-            }
-
-            // Create an object with the settings for this word counter
-            const counterSettings = {
-                nickname: accountName,
-                word_detect: wordDetectInput.value,
-                word_write: wordWriteInput.value,
-                threshold: parseInt(thresholdInput.value),
-                timeWindow: parseInt(timeWindowInput.value),
-                repeat: parseInt(repeatInput.value),
-                wait: parseInt(waitInput.value),
-                cooldown: parseInt(cooldownInput.value)
-            };
-
-            // Push the settings object to the array
-            wordCounterSettings.push(counterSettings);
-        });
-    });
+function activateSettings() {
+    
+    const wordCounterSettings = extractSettings();
 
     // Print the word counter settings
     console.log(wordCounterSettings);
@@ -231,9 +177,109 @@ function saveSettings() {
         return response.json();
     })
     .then(data => {
+        console.log('Settings activated successfully:', data);
+        showToast('Success', 'Settings activated successfully', 'green');
+    })
+    .catch(error => {
+        console.error('Error activating settings:', error);
+        showToast('Error', 'Error activating settings', 'red');
+    });
+}
+
+function saveConfigurations() {
+    const wordCounterSettings = extractSettings();
+
+    // Print the word counter settings
+    console.log(wordCounterSettings);
+
+    // Construct the payload to send to the server
+    const payload = {
+        word_counters: wordCounterSettings
+    };
+
+    // Send the payload to the server using fetch
+    fetch('/saveWordCounters', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to save settings');
+        }
+        return response.json();
+    })
+    .then(data => {
         console.log('Settings saved successfully:', data);
+        showToast('Success', 'Config saved successfully', 'green');
+
     })
     .catch(error => {
         console.error('Error saving settings:', error);
+        showToast('Error', 'Failed to save', 'red');
     });
+}
+
+function extractSettings() {
+    // Get the nickname of the account
+    const accountNames = document.querySelectorAll('.account-name');
+
+    // Initialize an array to store the settings for each word counter
+    const wordCounterSettings = [];
+
+    // Loop through each account
+    accountNames.forEach(accountNameElement => {
+        const accountName = accountNameElement.textContent.trim(); // Get the account name
+        
+        // Find the parent div with the class 'account'
+        const accountDiv = accountNameElement.closest('.account');
+        
+        // Select the table within the account div
+        const table = accountDiv.querySelector('.word-counters-table');
+        
+        if (!table) {
+            console.error('Table not found for account:', accountName);
+            return null;
+        }
+
+        // Select all rows in the table
+        const rows = table.querySelectorAll('tbody tr');
+
+        // Loop through each row
+        rows.forEach((row, index) => {
+            // Select input fields in the row
+            const wordDetectInput = row.querySelector('input[name="wordDetect"]');
+            const wordWriteInput = row.querySelector('input[name="wordWrite"]');
+            const thresholdInput = row.querySelector('input[name="threshold"]');
+            const timeWindowInput = row.querySelector('input[name="timeWindow"]');
+            const repeatInput = row.querySelector('input[name="repeat"]');
+            const waitInput = row.querySelector('input[name="wait"]');
+            const cooldownInput = row.querySelector('input[name="cooldown"]');
+
+            // Check if any of the input fields are null
+            if (!wordDetectInput || !wordWriteInput || !thresholdInput || !timeWindowInput || !repeatInput || !waitInput || !cooldownInput) {
+                console.error(`One or more input fields are null in row ${index + 1} of account ${accountName}.`);
+                return null;
+            }
+
+            // Create an object with the settings for this word counter
+            const counterSettings = {
+                nickname: accountName,
+                word_detect: wordDetectInput.value,
+                word_write: wordWriteInput.value,
+                threshold: parseInt(thresholdInput.value),
+                timeWindow: parseInt(timeWindowInput.value),
+                repeat: parseInt(repeatInput.value),
+                wait: parseInt(waitInput.value),
+                cooldown: parseInt(cooldownInput.value)
+            };
+
+            // Push the settings object to the array
+            wordCounterSettings.push(counterSettings);
+        });
+    });
+
+    return wordCounterSettings;
 }

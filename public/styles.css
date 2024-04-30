@@ -166,7 +166,7 @@ th {
     margin: 0 auto; /* Set margin to auto to horizontally center the input elements */
 }
 
-#saveButton {
+#saveButton, #saveConfigButton {
     padding: 10px 20px;
     font-size: 16px;
     border: none;
@@ -179,6 +179,14 @@ th {
 
 #saveButton:hover {
     background-color: #45a049;
+}
+
+#saveConfigButton {
+    background-color: #007bff;
+}
+
+#saveConfigButton:hover {
+    background-color: #285b90;
 }
 
 #activeAccButton {

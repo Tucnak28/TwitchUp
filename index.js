@@ -372,6 +372,66 @@ app.post('/connectWordCounters', (req, res) => {
 
 
 
+app.post('/saveWordCounters', (req, res) => {
+    // Extract the settings from the request body
+    const wordCounters = req.body.word_counters;
+
+    // Read the existing configuration file
+    let config = {};
+
+    // If config.accounts is undefined or null, initialize it as an empty object
+    if (!config.accounts) {
+        config.accounts = {};
+    }
+
+
+    // Truncate the existing configuration file
+    try {
+        fs.truncateSync('wordCounters_config.json');
+    } catch (error) {
+        console.error('Error truncating config file:', error);
+    }
+
+
+    // Update the configuration with the new wordCounters settings
+    wordCounters.forEach(counter => {
+        const { nickname } = counter;
+
+        // Find the corresponding account in the configuration
+        if (!config.accounts[nickname]) {
+            // If account not found, create it with an empty array for wordCounters
+            config.accounts[nickname] = {
+                wordCounters: []
+            };
+        }
+
+
+        // Add the wordCounter settings under the wordCounters array of the account
+        config.accounts[nickname].wordCounters.push({
+            word_detect: counter.word_detect,
+            word_write: counter.word_write,
+            threshold: counter.threshold,
+            timeWindow: counter.timeWindow,
+            repeat: counter.repeat,
+            wait: counter.wait,
+            cooldown: counter.cooldown
+        });
+    });
+
+    // Write the updated configuration back to the file
+    fs.writeFile('wordCounters_config.json', JSON.stringify(config, null, 2), 'utf-8', (err) => {
+        if (err) {
+            console.error('Error writing config file:', err);
+            res.sendStatus(500); // Internal Server Error
+        } else {
+            console.log('Word Counters settings saved successfully.');
+            res.sendStatus(200); // OK
+        }
+    });
+});
+
+
+
 
 // Function to select an active IRC client from activeAcc
 function selectMainIRCClient() {
