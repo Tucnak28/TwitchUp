@@ -24,16 +24,38 @@ http.listen(PORT, () => {
 
 class WordCounter {
     constructor(word_detect, word_write, threshold, timeWindow, repeat, wait, cooldown, ircClient) {
+        // The word to detect in the incoming messages
         this.word_detect = word_detect;
+
+        // The word to write as a response when the threshold is reached
         this.word_write = word_write;
+
+        // The number of occurrences of the word to detect required to trigger an action
         this.threshold = threshold;
+
+        // The time window (in milliseconds) within which the threshold must be reached
         this.timeWindow = timeWindow;
+
+        // The number of times to repeat the action when the threshold is reached
         this.repeat = repeat;
+
+        // The time (in milliseconds) to wait before sending the message
         this.wait = wait;
+
+        // The cooldown period (in milliseconds) before the word counter can trigger again
         this.cooldown = cooldown;
-        this.counter = 0;
-        this.timer = null;
+
+        // The IRC client associated with this word counter
         this.ircClient = ircClient;
+
+        // Initialize the counter to keep track of occurrences of the word to detect
+        this.counter = 0;
+        
+        // Initialize the timer used to reset the counter after the time window
+        this.timer = null;
+
+        // Flag to track whether the word counter is in cooldown state
+        this.isOnCooldown = false;
     }
 
     incrementCounter() {
@@ -41,7 +63,7 @@ class WordCounter {
         console.log(`Counter incremented: ${this.counter}`);
 
         // Check if the threshold is reached
-        if (this.counter >= this.threshold) {
+        if (this.counter >= this.threshold && !this.isOnCooldown) {
             this.triggerAction();
         }
     }
@@ -49,8 +71,23 @@ class WordCounter {
     triggerAction() {
         console.log(`Threshold reached: ${this.threshold} occurrences of "${this.word_detect}"`);
 
-        // Send the message to the IRC client's channels
-        this.ircClient.say(this.ircClient.channels.toString(), this.word_write);
+        const textToSend = concatenateString(this.word_write, this.repeat);
+
+        // Wait for the specified time before sending the message
+        setTimeout(() => {
+            // Send the message to the IRC client's channels
+            this.ircClient.say(this.ircClient.channels.toString(), textToSend);
+
+            // Start cooldown period
+            this.isOnCooldown = true;
+            setTimeout(() => {
+                console.log('Cooldown period ended.');
+                this.isOnCooldown = false;
+            }, this.cooldown);
+        }, this.wait);
+
+
+        
 
         // Perform the action here, e.g., write the word
         this.resetCounter();
@@ -79,6 +116,14 @@ class WordCounter {
             }, this.timeWindow);
         }
     }
+}
+
+function concatenateString(str, times) {
+    let result = '';
+    for (let i = 0; i < times; i++) {
+        result += str + ' ';
+    }
+    return result;
 }
 
 
@@ -300,16 +345,13 @@ app.post('/connectWordCounters', (req, res) => {
         if (existingAccountIndex !== -1) {
             const account = activeAcc[existingAccountIndex];
 
-            if (!account.wordCounters) {
-                // If not, initialize it as an empty array
-                account.wordCounters = [];
-            }
+            account.wordCounters = [];
 
             // Create a new word counter object
             const newWordCounter = new WordCounter(word_detect, word_write, threshold, timeWindow, repeat, wait, cooldown, account);
 
             // Push the new word counter to the wordCounters array of the account
-            account.wordCounters.push(newWordCounter);  
+            account.wordCounters.push(newWordCounter);
                       
             console.log(nickname + ": wordCounter Connected");
         }
