@@ -74,7 +74,7 @@ class WordCounter {
         let rndRepeat = this.repeat; // Default value if repeat is not -1
 
         if (this.repeat == -1) {
-            rndRepeat = randomInt(8); // Assign random value if repeat is -1
+            rndRepeat = randomInt(1, 8); // Assign random value if repeat is -1
         }
 
         const textToSend = concatenateString(this.word_write, rndRepeat);
