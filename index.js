@@ -133,70 +133,105 @@ function concatenateString(str, times) {
 
 class TipBot {
     constructor() {
+        this.isSending = false;
         this.tipAmounts = [];
-        this.eventInProgress = false;
-        this.tipDetectionTimeout = null;
-        this.tipDetectionDelay = 60000; // 1 minute delay for detecting tips
-        this.tipCombinationTimeout = null;
-        this.tipCombinationDelay = 20000; // 20 seconds delay for combining tips
-        this.tipCombination = null;
+        this.timer = null;
+        this.timeWindow = 20000; // delay for detecting tips
+        this.sendTimeWindow = 8000;
+        this.tipDelayTimeout = null;
+        this.tipSendDelay = 5000; // 20 seconds delay for combining tips
+        this.perfectTip = null;
         this.tipThreshold = 8; // Minimum number of tips required to start the event
     }
 
-    startTipDetection() {
-        // Clear any existing tip detection timeout
-        clearTimeout(this.tipDetectionTimeout);
-
-        // Start a new tip detection timeout
-        this.tipDetectionTimeout = setTimeout(() => {
-            if (this.tipAmounts.length >= this.tipThreshold) {
-                // Enough tips received, start combining and processing
-                this.combineTips();
-            } else {
-                // Reset tip amounts array
-                this.resetTipAmounts();
-            }
-        }, this.tipDetectionDelay);
-    }
-
-    combineTips() {
-        // Clear any existing tip combination timeout
-        clearTimeout(this.tipCombinationTimeout);
-
-        // Calculate combination of average and median
-        const average = this.calculateAverage(this.tipAmounts);
-        const median = this.calculateMedian(this.tipAmounts);
-
-        // Combine average and median
-        this.tipCombination = (average + median) / 2;
-
-        // Start tip combination timeout
-        this.tipCombinationTimeout = setTimeout(() => {
-            // Process tips for each account with TipBot activated
-            // For example:
-            this.processTips();
-
-            // Reset tip amounts array
-            this.resetTipAmounts();
-        }, this.tipCombinationDelay);
-    }
 
     processTips() {
-        // For demonstration purposes, let's just log the tips
-        console.log('Combined tip amount:', this.tipCombination);
-        console.log('Processing tips for each account...');
+        this.isSending = true;
+        // Clear any existing tip combination timeout
+        clearTimeout(this.tipDelayTimeout);
+        clearTimeout(this.timer);
+        console.log('Starting tip combination timeout...');
+        this.tipDelayTimeout = setTimeout(() => {
+            const median = this.calculateMedian(this.tipAmounts);
+
+            this.perfectTip = median;
+
+            this.sendTips();
+
+        }, this.tipSendDelay);
     }
+
+    sendTips() {
+        // Loop through each active account
+        activeAcc.forEach((account, index) => {
+            setTimeout(() => {
+                // Calculate the tip for the current account
+                let tipToSend = this.calculateUniqueTip();
+    
+                // Log the tip for the current account
+                console.log(`Tip for ${account.getUsername()}: ${tipToSend}`);
+
+                
+    
+                // Reset the perfectTip and tipAmounts array after logging the tip for each account
+                if (index === activeAcc.length - 1) {
+                    this.resetTipAmounts();
+                    this.isSending = false;
+                }
+            }, index * this.sendTimeWindow); // Delay each iteration by 20 seconds (index * 20000 milliseconds)
+        });
+    }
+    
+    calculateUniqueTip() {
+        let tipToSend = Math.round(this.perfectTip / 10) * 10;
+    
+        // Gradually increase the percentage around 30% of the roundedPerfectTip
+        let percent = 2; // Initial percentage
+        const step = 2; // Step to increase the percentage
+        const maxPercent = 1000; // Maximum percentage
+    
+        // Loop until a unique tip is generated or maximum percentage is reached
+        while (true) {
+            // Calculate the range based on the current percentage
+            const min = Math.round(this.perfectTip * (percent - 0.1));
+            const max = Math.round(this.perfectTip * (percent + 0.1));
+    
+            // Generate a random tip within the range
+            tipToSend = Math.floor(Math.random() * (max - min + 1)) + min;
+            tipToSend = Math.round(tipToSend / 10) * 10;
+    
+            // Check if the tip is not already in the tipsForAccounts array or tipAmounts array
+            if (!this.tipAmounts.includes(tipToSend)) {
+                break; // Exit the loop since a unique tip is found
+            }
+    
+            // Increase the percentage for the next iteration
+            percent += step;
+    
+            // Check if maximum percentage is reached
+            if (percent >= maxPercent) {
+                console.log("Maximum percentage reached. Cannot find a unique tip.");
+                break; // Exit the loop since maximum percentage is reached
+            }
+        }
+
+                                   this.tipAmounts.push(tipToSend); //remove this later, because the tip will be added automatically because the tip will be in chat
+        return tipToSend;
+    }
+    
+    
+    
+    
+    
 
     resetTipAmounts() {
         // Clear tip amounts array
         this.tipAmounts = [];
+        this.perfectTip = null;
+
         console.log('Resetting tip amounts array...');
     }
 
-    calculateAverage(array) {
-        const sum = array.reduce((acc, val) => acc + val, 0);
-        return sum / array.length;
-    }
 
     calculateMedian(array) {
         const sortedArray = array.sort((a, b) => a - b);
@@ -209,32 +244,41 @@ class TipBot {
     }
 
     processMessage(message) {
-    
         const trimmedMessage = message.replace(/\s+/g, '');
 
         // Check if the trimmed message is a pure number
         const pureNumber = /^\d+$/.test(trimmedMessage);
-    
+
         if (pureNumber) {
             // Convert the message to a number
             const tipAmount = parseInt(trimmedMessage, 10);
-    
+
             // Add the tip amount
+            console.log('Received tip amount:', tipAmount);
             this.addTip(tipAmount);
         }
     }
-    
 
     addTip(amount) {
         // Add tip amount to the array
         this.tipAmounts.push(amount);
 
-        // If an event is not already in progress, start tip detection
-        if (!this.eventInProgress) {
-            this.startTipDetection();
+        clearTimeout(this.timer);
+
+        if(this.isSending) return;
+
+        this.timer = setTimeout(() => {
+            console.log('Timer expired. Counter reset.');
+            this.resetTipAmounts();
+        }, this.timeWindow);
+
+        if (this.tipAmounts.length >= this.tipThreshold) {
+            // Enough tips received, start processing
+            this.processTips();
         }
     }
 }
+
 
 
 
@@ -356,7 +400,7 @@ app.post('/toggleConnection/:accountId', (req, res) => {
 
     // Connect the new account
     const accountClient = new tmi.Client({
-        options: { debug: true },
+        options: { debug: false },
         connection: {
             secure: true,
             reconnect: true
