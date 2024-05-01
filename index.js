@@ -131,6 +131,113 @@ function concatenateString(str, times) {
     return result;
 }
 
+class TipBot {
+    constructor() {
+        this.tipAmounts = [];
+        this.eventInProgress = false;
+        this.tipDetectionTimeout = null;
+        this.tipDetectionDelay = 60000; // 1 minute delay for detecting tips
+        this.tipCombinationTimeout = null;
+        this.tipCombinationDelay = 20000; // 20 seconds delay for combining tips
+        this.tipCombination = null;
+        this.tipThreshold = 8; // Minimum number of tips required to start the event
+    }
+
+    startTipDetection() {
+        // Clear any existing tip detection timeout
+        clearTimeout(this.tipDetectionTimeout);
+
+        // Start a new tip detection timeout
+        this.tipDetectionTimeout = setTimeout(() => {
+            if (this.tipAmounts.length >= this.tipThreshold) {
+                // Enough tips received, start combining and processing
+                this.combineTips();
+            } else {
+                // Reset tip amounts array
+                this.resetTipAmounts();
+            }
+        }, this.tipDetectionDelay);
+    }
+
+    combineTips() {
+        // Clear any existing tip combination timeout
+        clearTimeout(this.tipCombinationTimeout);
+
+        // Calculate combination of average and median
+        const average = this.calculateAverage(this.tipAmounts);
+        const median = this.calculateMedian(this.tipAmounts);
+
+        // Combine average and median
+        this.tipCombination = (average + median) / 2;
+
+        // Start tip combination timeout
+        this.tipCombinationTimeout = setTimeout(() => {
+            // Process tips for each account with TipBot activated
+            // For example:
+            this.processTips();
+
+            // Reset tip amounts array
+            this.resetTipAmounts();
+        }, this.tipCombinationDelay);
+    }
+
+    processTips() {
+        // For demonstration purposes, let's just log the tips
+        console.log('Combined tip amount:', this.tipCombination);
+        console.log('Processing tips for each account...');
+    }
+
+    resetTipAmounts() {
+        // Clear tip amounts array
+        this.tipAmounts = [];
+        console.log('Resetting tip amounts array...');
+    }
+
+    calculateAverage(array) {
+        const sum = array.reduce((acc, val) => acc + val, 0);
+        return sum / array.length;
+    }
+
+    calculateMedian(array) {
+        const sortedArray = array.sort((a, b) => a - b);
+        const middleIndex = Math.floor(sortedArray.length / 2);
+        if (sortedArray.length % 2 === 0) {
+            return (sortedArray[middleIndex - 1] + sortedArray[middleIndex]) / 2;
+        } else {
+            return sortedArray[middleIndex];
+        }
+    }
+
+    processMessage(message) {
+    
+        const trimmedMessage = message.replace(/\s+/g, '');
+
+        // Check if the trimmed message is a pure number
+        const pureNumber = /^\d+$/.test(trimmedMessage);
+    
+        if (pureNumber) {
+            // Convert the message to a number
+            const tipAmount = parseInt(trimmedMessage, 10);
+    
+            // Add the tip amount
+            this.addTip(tipAmount);
+        }
+    }
+    
+
+    addTip(amount) {
+        // Add tip amount to the array
+        this.tipAmounts.push(amount);
+
+        // If an event is not already in progress, start tip detection
+        if (!this.eventInProgress) {
+            this.startTipDetection();
+        }
+    }
+}
+
+
+
 
 
 // Handle incoming WebSocket connections from clients
@@ -460,6 +567,7 @@ app.post('/saveWordCounters', (req, res) => {
 
 
 
+const tipBot = new TipBot();
 
 // Function to select an active IRC client from activeAcc
 function selectMainIRCClient() {
@@ -508,6 +616,8 @@ function selectMainIRCClient() {
                         }
                     });
                 }
+
+                tipBot.processMessage(message);
             })
 
             return;

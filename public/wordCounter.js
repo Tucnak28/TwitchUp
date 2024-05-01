@@ -1,4 +1,3 @@
-
 // Function to fetch list of active accounts from the server
 function fetchActiveAccounts() {
     const nicknameListContainer = document.querySelector('#activeAccountsWordCounter');
