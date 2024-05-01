@@ -170,6 +170,7 @@ class TipBot {
     
                 // Log the tip for the current account
                 console.log(`Tip for ${account.getUsername()}: ${tipToSend}`);
+                account.say(account.channels.toString(), tipToSend.toString());
 
                 
     
@@ -186,8 +187,8 @@ class TipBot {
         let tipToSend = Math.round(this.perfectTip / 10) * 10;
     
         // Gradually increase the percentage around 30% of the roundedPerfectTip
-        let percent = 2; // Initial percentage
-        const step = 2; // Step to increase the percentage
+        let percent = 0.5; // Initial percentage
+        const step = 0.5; // Step to increase the percentage
         const maxPercent = 1000; // Maximum percentage
     
         // Loop until a unique tip is generated or maximum percentage is reached
@@ -199,6 +200,8 @@ class TipBot {
             // Generate a random tip within the range
             tipToSend = Math.floor(Math.random() * (max - min + 1)) + min;
             tipToSend = Math.round(tipToSend / 10) * 10;
+
+            console.log(tipToSend);
     
             // Check if the tip is not already in the tipsForAccounts array or tipAmounts array
             if (!this.tipAmounts.includes(tipToSend)) {
@@ -215,7 +218,7 @@ class TipBot {
             }
         }
 
-                                   this.tipAmounts.push(tipToSend); //remove this later, because the tip will be added automatically because the tip will be in chat
+                                   //this.tipAmounts.push(tipToSend); //remove this later, because the tip will be added automatically because the tip will be in chat
         return tipToSend;
     }
     
@@ -225,6 +228,7 @@ class TipBot {
     
 
     resetTipAmounts() {
+        console.log(this.tipAmounts);
         // Clear tip amounts array
         this.tipAmounts = [];
         this.perfectTip = null;
