@@ -270,7 +270,7 @@ app.post('/sendMessage', (req, res) => {
         return res.status(404).send("Account not found");
     }
 
-    console.log(`Received message from client for account "${nickname}": ${message}`);
+    //console.log(`Received message from client for account "${nickname}": ${message}`);
 
     // Flag to track whether a notice was received
     let noticeReceived = '';
@@ -285,7 +285,7 @@ app.post('/sendMessage', (req, res) => {
     ircClient.say(ircClient.channels.toString(), message);
 
     // Send a success response back to the client
-    console.log(`Message sent to account "${nickname}" successfully.`);
+    //console.log(`Message sent to account "${nickname}" successfully.`);
     
 
     // After sending the response, if a notice was received, send it as a separate response
@@ -435,10 +435,10 @@ app.post('/connectWordCounters', (req, res) => {
     const wordCounters = req.body.word_counters;
 
     // Log the settings
-    console.log('Word Counters Settings:');
+    //console.log('Word Counters Settings:');
     wordCounters.forEach((counter, index) => {
         const { nickname, word_detect, word_write, threshold, timeWindow, repeat, wait, cooldown } = counter;
-        console.log(`Counter ${index + 1}:`);
+        /*console.log(`Counter ${index + 1}:`);
         console.log(`Nickname: ${nickname}`);
         console.log(`Word to Detect: ${word_detect}`);
         console.log(`Word to Write: ${word_write}`);
@@ -447,7 +447,7 @@ app.post('/connectWordCounters', (req, res) => {
         console.log(`Repeat: ${repeat}`);
         console.log(`Wait: ${wait}`);
         console.log(`Cooldown: ${cooldown}`);
-        console.log('\n');
+        console.log('\n');*/
 
 
 
@@ -593,7 +593,7 @@ function selectMainIRCClient() {
 
                 wss.clients.forEach(wsClient => {
                     if (wsClient.readyState === WebSocket.OPEN) {
-                        console.log('Sending message to client:', message);
+                        //console.log('Sending message to client:', message);
                         wsClient.send(JSON.stringify({ channel, tags, message }));
                     }
                 });  
