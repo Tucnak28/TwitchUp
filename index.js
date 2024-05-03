@@ -133,38 +133,74 @@ function concatenateString(str, times) {
 
 class TipBot {
     constructor() {
-        this.isSending = false;
+        // Flag indicating whether the event is currently running
+        this.eventRunning = false;
+    
+        // Array to store the tip amounts received during the event
         this.tipAmounts = [];
+    
+        // Timer used to monitor the time window for reaching the tip threshold
         this.timer = null;
-        this.timeWindow = 20000; // delay for detecting tips
+    
+        // Time window (in milliseconds) within which the tip threshold must be reached to start the event
+        this.timeWindow = 10000;
+    
+        // Time window (in milliseconds) all accounts needs to be sent
         this.sendTimeWindow = 8000;
+    
+        // Timeout used to delay sending tips after the combination calculation
         this.tipDelayTimeout = null;
-        this.tipSendDelay = 5000; // 20 seconds delay for combining tips
+    
+        // Delay (in milliseconds) before sending tips after the combination calculation
+        this.tipSendDelay = 5000;
+    
+        // The perfect tip amount calculated based on received tips
         this.perfectTip = null;
-        this.tipThreshold = 8; // Minimum number of tips required to start the event
+    
+        // Minimum number of tips required to start the event
+        this.tipThreshold = 8;
+    
+        // Maximum duration (in milliseconds) the event can last before automatically stopping
+        this.eventDuration = 120000;
+    
+        // Flag indicating whether the bot is currently on cooldown
+        this.isOnCooldown = false;
+    
+        // Duration (in milliseconds) of the cooldown period
+        this.cooldownDuration = 100000;
+    
+        // Percentage range around the perfect tip used to calculate unique tips
+        this.tipRangePercentage = 0.25;
+    
+        // List of stop words that can be used to stop the event prematurely
+        this.stopWords = ["stop", "stoop", "uzavřena!", "uzavřena"];
     }
 
 
     processTips() {
-        this.isSending = true;
+        this.eventRunning = true;
         // Clear any existing tip combination timeout
         clearTimeout(this.tipDelayTimeout);
         clearTimeout(this.timer);
+
         console.log('Starting tip combination timeout...');
         this.tipDelayTimeout = setTimeout(() => {
-            const median = this.calculateMedian(this.tipAmounts);
-
-            this.perfectTip = median;
 
             this.sendTips();
 
         }, this.tipSendDelay);
     }
 
-    sendTips() {
+    sendTips() {    
+        // Shuffle the activeAcc array before looping through it
+        const shuffledActiveAcc = shuffleArray(activeAcc);
         // Loop through each active account
-        activeAcc.forEach((account, index) => {
+        shuffledActiveAcc.forEach((account, index) => {
             setTimeout(() => {
+                if(!this.eventRunning) return;
+
+                this.perfectTip = this.calculateMedian(this.tipAmounts);
+
                 // Calculate the tip for the current account
                 let tipToSend = this.calculateUniqueTip();
     
@@ -176,32 +212,34 @@ class TipBot {
     
                 // Reset the perfectTip and tipAmounts array after logging the tip for each account
                 if (index === activeAcc.length - 1) {
-                    this.resetTipAmounts();
-                    this.isSending = false;
+                    console.log("All account sent their tips");
+                    //this.resetTipAmounts();
+                    //this.eventRunning = false;
                 }
-            }, index * this.sendTimeWindow); // Delay each iteration by 20 seconds (index * 20000 milliseconds)
+            }, index * (this.sendTimeWindow / activeAcc.length)); // Delay each iteration by 20 seconds (index * 20000 milliseconds)
         });
+
+        this.startEventTimer();
     }
     
     calculateUniqueTip() {
         let tipToSend = Math.round(this.perfectTip / 10) * 10;
     
         // Gradually increase the percentage around 30% of the roundedPerfectTip
-        let percent = 0.5; // Initial percentage
+        let percent = this.tipRangePercentage; // Initial percentage
         const step = 0.5; // Step to increase the percentage
-        const maxPercent = 1000; // Maximum percentage
+        const maxPercent = 100; // Maximum percentage
     
         // Loop until a unique tip is generated or maximum percentage is reached
         while (true) {
             // Calculate the range based on the current percentage
-            const min = Math.round(this.perfectTip * (percent - 0.1));
-            const max = Math.round(this.perfectTip * (percent + 0.1));
+            const min = Math.max(0, Math.round(this.perfectTip * (1 - percent)));
+            const max = Math.round(this.perfectTip * (1 + percent));
     
             // Generate a random tip within the range
             tipToSend = Math.floor(Math.random() * (max - min + 1)) + min;
             tipToSend = Math.round(tipToSend / 10) * 10;
 
-            console.log(tipToSend);
     
             // Check if the tip is not already in the tipsForAccounts array or tipAmounts array
             if (!this.tipAmounts.includes(tipToSend)) {
@@ -229,9 +267,15 @@ class TipBot {
 
     resetTipAmounts() {
         console.log(this.tipAmounts);
+
+        this.eventRunning = false;
+
         // Clear tip amounts array
         this.tipAmounts = [];
         this.perfectTip = null;
+
+        clearTimeout(this.tipDelayTimeout);
+        clearTimeout(this.timer);
 
         console.log('Resetting tip amounts array...');
     }
@@ -247,29 +291,70 @@ class TipBot {
         }
     }
 
+    startCooldown() {
+        // Set isOnCooldown to true
+        this.isOnCooldown = true;
+
+        console.log(`Starting ${this.cooldownDuration/1000} seconds cooldown`);
+    
+        // Set a timeout to reset isOnCooldown after three minutes
+        setTimeout(() => {
+            // Reset isOnCooldown to false after three minutes
+            this.isOnCooldown = false;
+            console.log('Cooldown ended. isOnCooldown set to false.');
+            this.resetTipAmounts();
+        }, this.cooldownDuration); // Three minutes in milliseconds
+    }
+
     processMessage(message) {
         const trimmedMessage = message.replace(/\s+/g, '');
 
+        // Check if the message contains "stop"
+        if (this.stopWords.some(word => trimmedMessage.includes(word))) {
+            // Set eventRunning to false to stop the event
+            
+            console.log('Event stopped due to "stop" message.');
+
+            this.resetTipAmounts();
+            this.startCooldown();
+            return; // Exit the method
+        }
+    
         // Check if the trimmed message is a pure number
         const pureNumber = /^\d+$/.test(trimmedMessage);
-
+    
         if (pureNumber) {
             // Convert the message to a number
             const tipAmount = parseInt(trimmedMessage, 10);
-
-            // Add the tip amount
-            console.log('Received tip amount:', tipAmount);
+    
             this.addTip(tipAmount);
         }
     }
 
+    startEventTimer() {
+        // Set a timeout to stop the event after two minutes
+        setTimeout(() => {
+            if (!this.eventRunning) {
+                return; // Event already stopped
+            }
+            
+            console.log('Stopping the event.');
+            this.resetTipAmounts();
+            this.startCooldown();
+        }, this.eventDuration); // Two minutes in milliseconds
+    }
+    
+
     addTip(amount) {
+        if(this.isOnCooldown) return;
+
+        console.log('Received tip amount:', amount);
         // Add tip amount to the array
         this.tipAmounts.push(amount);
 
         clearTimeout(this.timer);
 
-        if(this.isSending) return;
+        if(this.eventRunning) return;
 
         this.timer = setTimeout(() => {
             console.log('Timer expired. Counter reset.');
@@ -281,6 +366,14 @@ class TipBot {
             this.processTips();
         }
     }
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
 }
 
 
