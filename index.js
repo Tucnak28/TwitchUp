@@ -310,7 +310,7 @@ class TipBot {
         const trimmedMessage = message.replace(/\s+/g, '');
 
         // Check if the message contains "stop"
-        if (this.stopWords.some(word => trimmedMessage.includes(word))) {
+        if (this.stopWords.some(word => trimmedMessage.includes(word)) && this.eventRunning) {
             // Set eventRunning to false to stop the event
             
             console.log('Event stopped due to "stop" message.');
