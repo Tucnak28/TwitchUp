@@ -111,7 +111,7 @@ class WordCounter {
 
     processWord(inputWord) {
         // Check if the input word matches the target word
-        if (inputWord === this.word_detect) {
+        if (inputWord.includes(this.word_detect)) {
             // Increment the counter and reset timer
             this.incrementCounter();
             clearTimeout(this.timer);
