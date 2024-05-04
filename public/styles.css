@@ -166,7 +166,7 @@ th {
     margin: 0 auto; /* Set margin to auto to horizontally center the input elements */
 }
 
-#saveButton, #saveConfigButton {
+#saveButton, #saveConfigButton, #saveButton-WordCounter {
     padding: 10px 20px;
     font-size: 16px;
     border: none;
@@ -177,7 +177,7 @@ th {
     transition: background-color 0.3s;
 }
 
-#saveButton:hover {
+#saveButton:hover, #saveButton-WordCounter:hover {
     background-color: #45a049;
 }
 
