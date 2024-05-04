@@ -193,7 +193,7 @@ class TipBot {
 
     sendTips() {    
         // Shuffle the activeAcc array before looping through it
-        const shuffledActiveAcc = shuffleArray(activeAcc);
+        const shuffledActiveAcc = shuffleArray(activeTipbotAccounts);
         // Loop through each active account
         shuffledActiveAcc.forEach((account, index) => {
             setTimeout(() => {
@@ -211,7 +211,7 @@ class TipBot {
                 
     
                 // Reset the perfectTip and tipAmounts array after logging the tip for each account
-                if (index === activeAcc.length - 1) {
+                if (index === shuffledActiveAcc.length - 1) {
                     console.log("All account sent their tips");
                     //this.resetTipAmounts();
                     //this.eventRunning = false;
@@ -393,6 +393,7 @@ wss.on('connection', function connection(ws) {
 // Read the JSON file containing IRC client configurations
 let ircConfigs = JSON.parse(fs.readFileSync('accounts.json', 'utf-8'));
 const activeAcc = [];
+const activeTipbotAccounts = [];
 
 
 app.post('/sendMessage', (req, res) => {
@@ -767,3 +768,26 @@ function selectMainIRCClient() {
     mainIrcClient = null;
     console.log('No active IRC client found.');
 }
+
+app.post('/toggleTipBot/:accountId', (req, res) => {
+    const accountId = req.params.accountId;
+
+    const accountIRC = activeAcc.find(account => account.getUsername().toLowerCase() === accountId.toLowerCase());
+
+    // Check if the account ID exists in the activeTipbotAccounts array
+    const index = activeTipbotAccounts.indexOf(accountIRC);
+
+    
+
+    if (index === -1) {
+        // Account ID not found, add it to the activeTipbotAccounts array
+        activeTipbotAccounts.push(accountIRC);
+        console.log(`TipBot ${accountId} connected.`);
+        res.status(200).send('Connected');
+    } else {
+        // Account ID found, remove it from the activeTipbotAccounts array
+        activeTipbotAccounts.splice(index, 1);
+        console.log(`TipBot ${accountId} disconnected.`);
+        res.status(200).send('Disconnected');
+    }
+});

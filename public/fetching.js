@@ -179,7 +179,8 @@ function checkConnections() {
         .then(data => {
             activeAcc = data;
             populateNickPanel();
-            fetchActiveAccounts();
+            fetchWordCounter();
+            fetchTipBot();
         })
         .catch(error => {
             console.error('Error checking connections:', error);
