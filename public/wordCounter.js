@@ -1,6 +1,5 @@
-
 // Function to fetch list of active accounts from the server
-function fetchActiveAccounts() {
+function fetchWordCounter() {
     const nicknameListContainer = document.querySelector('#activeAccountsWordCounter');
 
     // Store the IDs of existing nickname items
@@ -188,7 +187,7 @@ function removeWordCounter(listItem) {
 
 document.addEventListener('DOMContentLoaded', function() {
     // Add event listener to the "Save" button
-    document.getElementById('saveButton').addEventListener('click', activateSettings);
+    document.getElementById('saveButton-WordCounter').addEventListener('click', activateSettings);
     document.getElementById('saveConfigButton').addEventListener('click', saveConfigurations);
 });
 

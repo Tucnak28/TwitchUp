@@ -26,7 +26,7 @@
                         <a class="nav-link" id="WordDetection-tab" data-toggle="tab" href="#WordDetection" role="tab" aria-controls="WordDetection" aria-selected="false">Word Detection</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="appearance-tab" data-toggle="tab" href="#appearance" role="tab" aria-controls="appearance" aria-selected="false">Appearance</a>
+                        <a class="nav-link" id="tipBot-tab" data-toggle="tab" href="#tipBot" role="tab" aria-controls="tipBot" aria-selected="false">TipBot</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="accounts-tab" data-toggle="tab" href="#accounts" role="tab" aria-controls="accounts" aria-selected="false">Accounts</a>
@@ -67,15 +67,14 @@
                             <!-- Active accounts and their word counters will be appended here -->
                         </div>
                         
-                        <button id="saveButton">Activate</button>
+                        <button id="saveButton-WordCounter">Activate</button>
                         <button id="saveConfigButton">Save Configuration</button>
                     </div>
                     
 
-                    <!-- Appearance tab -->
-                    <div class="tab-pane fade" id="appearance" role="tabpanel" aria-labelledby="appearance-tab">
-                        <h3>Appearance Settings</h3>
-                        <p>This is where you can configure appearance settings.</p>
+                    <!-- tipBot tab -->
+                    <div class="tab-pane fade" id="tipBot" role="tabpanel" aria-labelledby="tipBot-tab">
+                        <div id="activeAccountsTipBot"></div>
                     </div>
 
                     <div class="tab-pane fade" id="accounts" role="tabpanel" aria-labelledby="accounts-tab">
@@ -127,5 +126,6 @@
     <script src="fetching.js"></script>
     <script src="accountManagement.js"></script>
     <script src="wordCounter.js"></script>
+    <script src="tipBot.js"></script>
 </body>
 </html>

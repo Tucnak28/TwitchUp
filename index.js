@@ -131,6 +131,254 @@ function concatenateString(str, times) {
     return result;
 }
 
+class TipBot {
+    constructor() {
+        // Flag indicating whether the event is currently running
+        this.eventRunning = false;
+    
+        // Array to store the tip amounts received during the event
+        this.tipAmounts = [];
+    
+        // Timer used to monitor the time window for reaching the tip threshold
+        this.timer = null;
+    
+        // Time window (in milliseconds) within which the tip threshold must be reached to start the event
+        this.timeWindow = 10000;
+    
+        // Time window (in milliseconds) all accounts needs to be sent
+        this.sendTimeWindow = 15000;
+    
+        // Timeout used to delay sending tips after the combination calculation
+        this.tipDelayTimeout = null;
+    
+        // Delay (in milliseconds) before sending tips after the combination calculation
+        this.tipSendDelay = 5000;
+    
+        // The perfect tip amount calculated based on received tips
+        this.perfectTip = null;
+    
+        // Minimum number of tips required to start the event
+        this.tipThreshold = 8;
+    
+        // Maximum duration (in milliseconds) the event can last before automatically stopping
+        this.eventDuration = 120000;
+    
+        // Flag indicating whether the bot is currently on cooldown
+        this.isOnCooldown = false;
+    
+        // Duration (in milliseconds) of the cooldown period
+        this.cooldownDuration = 100000;
+    
+        // Percentage range around the perfect tip used to calculate unique tips
+        this.tipRangePercentage = 0.25;
+    
+        // List of stop words that can be used to stop the event prematurely
+        this.stopWords = ["stop", "stoop", "uzavřena!", "uzavřena"];
+    }
+
+
+    processTips() {
+        this.eventRunning = true;
+        // Clear any existing tip combination timeout
+        clearTimeout(this.tipDelayTimeout);
+        clearTimeout(this.timer);
+
+        console.log('Starting tip combination timeout...');
+        this.tipDelayTimeout = setTimeout(() => {
+
+            this.sendTips();
+
+        }, this.tipSendDelay);
+    }
+
+    sendTips() {    
+        // Shuffle the activeAcc array before looping through it
+        const shuffledActiveAcc = shuffleArray(activeTipbotAccounts);
+        // Loop through each active account
+        shuffledActiveAcc.forEach((account, index) => {
+            setTimeout(() => {
+                if(!this.eventRunning) return;
+
+                this.perfectTip = this.calculateMedian(this.tipAmounts);
+
+                // Calculate the tip for the current account
+                let tipToSend = this.calculateUniqueTip();
+    
+                // Log the tip for the current account
+                console.log(`Tip for ${account.getUsername()}: ${tipToSend}`);
+                account.say(account.channels.toString(), tipToSend.toString());
+
+                
+    
+                // Reset the perfectTip and tipAmounts array after logging the tip for each account
+                if (index === shuffledActiveAcc.length - 1) {
+                    console.log("All account sent their tips");
+                    //this.resetTipAmounts();
+                    //this.eventRunning = false;
+                }
+            }, index * (this.sendTimeWindow / activeAcc.length)); // Delay each iteration by 20 seconds (index * 20000 milliseconds)
+        });
+
+        this.startEventTimer();
+    }
+    
+    calculateUniqueTip() {
+        let tipToSend = Math.round(this.perfectTip / 10) * 10;
+    
+        // Gradually increase the percentage around 30% of the roundedPerfectTip
+        let percent = this.tipRangePercentage; // Initial percentage
+        const step = 0.5; // Step to increase the percentage
+        const maxPercent = 100; // Maximum percentage
+    
+        // Loop until a unique tip is generated or maximum percentage is reached
+        while (true) {
+            // Calculate the range based on the current percentage
+            const min = Math.max(0, Math.round(this.perfectTip * (1 - percent)));
+            const max = Math.round(this.perfectTip * (1 + percent));
+    
+            // Generate a random tip within the range
+            tipToSend = Math.floor(Math.random() * (max - min + 1)) + min;
+            tipToSend = Math.round(tipToSend / 10) * 10;
+
+    
+            // Check if the tip is not already in the tipsForAccounts array or tipAmounts array
+            if (!this.tipAmounts.includes(tipToSend)) {
+                break; // Exit the loop since a unique tip is found
+            }
+    
+            // Increase the percentage for the next iteration
+            percent += step;
+    
+            // Check if maximum percentage is reached
+            if (percent >= maxPercent) {
+                console.log("Maximum percentage reached. Cannot find a unique tip.");
+                break; // Exit the loop since maximum percentage is reached
+            }
+        }
+
+                                   //this.tipAmounts.push(tipToSend); //remove this later, because the tip will be added automatically because the tip will be in chat
+        return tipToSend;
+    }
+    
+    
+    
+    
+    
+
+    resetTipAmounts() {
+        console.log(this.tipAmounts);
+
+        this.eventRunning = false;
+
+        // Clear tip amounts array
+        this.tipAmounts = [];
+        this.perfectTip = null;
+
+        clearTimeout(this.tipDelayTimeout);
+        clearTimeout(this.timer);
+
+        console.log('Resetting tip amounts array...');
+    }
+
+
+    calculateMedian(array) {
+        const sortedArray = array.sort((a, b) => a - b);
+        const middleIndex = Math.floor(sortedArray.length / 2);
+        if (sortedArray.length % 2 === 0) {
+            return (sortedArray[middleIndex - 1] + sortedArray[middleIndex]) / 2;
+        } else {
+            return sortedArray[middleIndex];
+        }
+    }
+
+    startCooldown() {
+        // Set isOnCooldown to true
+        this.isOnCooldown = true;
+
+        console.log(`Starting ${this.cooldownDuration/1000} seconds cooldown`);
+    
+        // Set a timeout to reset isOnCooldown after three minutes
+        setTimeout(() => {
+            // Reset isOnCooldown to false after three minutes
+            this.isOnCooldown = false;
+            console.log('Cooldown ended. isOnCooldown set to false.');
+            this.resetTipAmounts();
+        }, this.cooldownDuration); // Three minutes in milliseconds
+    }
+
+    processMessage(message) {
+        const trimmedMessage = message.replace(/\s+/g, '');
+
+        // Check if the message contains "stop"
+        if (this.stopWords.some(word => trimmedMessage.includes(word)) && this.eventRunning) {
+            // Set eventRunning to false to stop the event
+            
+            console.log('Event stopped due to "stop" message.');
+
+            this.resetTipAmounts();
+            this.startCooldown();
+            return; // Exit the method
+        }
+    
+        // Check if the trimmed message is a pure number
+        const pureNumber = /^\d+$/.test(trimmedMessage);
+    
+        if (pureNumber) {
+            // Convert the message to a number
+            const tipAmount = parseInt(trimmedMessage, 10);
+    
+            this.addTip(tipAmount);
+        }
+    }
+
+    startEventTimer() {
+        // Set a timeout to stop the event after two minutes
+        setTimeout(() => {
+            if (!this.eventRunning) {
+                return; // Event already stopped
+            }
+            
+            console.log('Stopping the event.');
+            this.resetTipAmounts();
+            this.startCooldown();
+        }, this.eventDuration); // Two minutes in milliseconds
+    }
+    
+
+    addTip(amount) {
+        if(this.isOnCooldown) return;
+
+        console.log('Received tip amount:', amount);
+        // Add tip amount to the array
+        this.tipAmounts.push(amount);
+
+        clearTimeout(this.timer);
+
+        if(this.eventRunning) return;
+
+        this.timer = setTimeout(() => {
+            console.log('Timer expired. Counter reset.');
+            this.resetTipAmounts();
+        }, this.timeWindow);
+
+        if (this.tipAmounts.length >= this.tipThreshold) {
+            // Enough tips received, start processing
+            this.processTips();
+        }
+    }
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+
+
+
 
 
 // Handle incoming WebSocket connections from clients
@@ -145,6 +393,7 @@ wss.on('connection', function connection(ws) {
 // Read the JSON file containing IRC client configurations
 let ircConfigs = JSON.parse(fs.readFileSync('accounts.json', 'utf-8'));
 const activeAcc = [];
+const activeTipbotAccounts = [];
 
 
 app.post('/sendMessage', (req, res) => {
@@ -163,7 +412,7 @@ app.post('/sendMessage', (req, res) => {
         return res.status(404).send("Account not found");
     }
 
-    console.log(`Received message from client for account "${nickname}": ${message}`);
+    //console.log(`Received message from client for account "${nickname}": ${message}`);
 
     // Flag to track whether a notice was received
     let noticeReceived = '';
@@ -178,7 +427,7 @@ app.post('/sendMessage', (req, res) => {
     ircClient.say(ircClient.channels.toString(), message);
 
     // Send a success response back to the client
-    console.log(`Message sent to account "${nickname}" successfully.`);
+    //console.log(`Message sent to account "${nickname}" successfully.`);
     
 
     // After sending the response, if a notice was received, send it as a separate response
@@ -249,7 +498,7 @@ app.post('/toggleConnection/:accountId', (req, res) => {
 
     // Connect the new account
     const accountClient = new tmi.Client({
-        options: { debug: true },
+        options: { debug: false },
         connection: {
             secure: true,
             reconnect: true
@@ -328,10 +577,10 @@ app.post('/connectWordCounters', (req, res) => {
     const wordCounters = req.body.word_counters;
 
     // Log the settings
-    console.log('Word Counters Settings:');
+    //console.log('Word Counters Settings:');
     wordCounters.forEach((counter, index) => {
         const { nickname, word_detect, word_write, threshold, timeWindow, repeat, wait, cooldown } = counter;
-        console.log(`Counter ${index + 1}:`);
+        /*console.log(`Counter ${index + 1}:`);
         console.log(`Nickname: ${nickname}`);
         console.log(`Word to Detect: ${word_detect}`);
         console.log(`Word to Write: ${word_write}`);
@@ -340,7 +589,7 @@ app.post('/connectWordCounters', (req, res) => {
         console.log(`Repeat: ${repeat}`);
         console.log(`Wait: ${wait}`);
         console.log(`Cooldown: ${cooldown}`);
-        console.log('\n');
+        console.log('\n');*/
 
 
 
@@ -460,6 +709,7 @@ app.post('/saveWordCounters', (req, res) => {
 
 
 
+const tipBot = new TipBot();
 
 // Function to select an active IRC client from activeAcc
 function selectMainIRCClient() {
@@ -485,7 +735,7 @@ function selectMainIRCClient() {
 
                 wss.clients.forEach(wsClient => {
                     if (wsClient.readyState === WebSocket.OPEN) {
-                        console.log('Sending message to client:', message);
+                        //console.log('Sending message to client:', message);
                         wsClient.send(JSON.stringify({ channel, tags, message }));
                     }
                 });  
@@ -508,6 +758,8 @@ function selectMainIRCClient() {
                         }
                     });
                 }
+
+                tipBot.processMessage(message);
             })
 
             return;
@@ -516,3 +768,26 @@ function selectMainIRCClient() {
     mainIrcClient = null;
     console.log('No active IRC client found.');
 }
+
+app.post('/toggleTipBot/:accountId', (req, res) => {
+    const accountId = req.params.accountId;
+
+    const accountIRC = activeAcc.find(account => account.getUsername().toLowerCase() === accountId.toLowerCase());
+
+    // Check if the account ID exists in the activeTipbotAccounts array
+    const index = activeTipbotAccounts.indexOf(accountIRC);
+
+    
+
+    if (index === -1) {
+        // Account ID not found, add it to the activeTipbotAccounts array
+        activeTipbotAccounts.push(accountIRC);
+        console.log(`TipBot ${accountId} connected.`);
+        res.status(200).send('Connected');
+    } else {
+        // Account ID found, remove it from the activeTipbotAccounts array
+        activeTipbotAccounts.splice(index, 1);
+        console.log(`TipBot ${accountId} disconnected.`);
+        res.status(200).send('Disconnected');
+    }
+});
