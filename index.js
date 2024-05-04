@@ -146,7 +146,7 @@ class TipBot {
         this.timeWindow = 10000;
     
         // Time window (in milliseconds) all accounts needs to be sent
-        this.sendTimeWindow = 8000;
+        this.sendTimeWindow = 15000;
     
         // Timeout used to delay sending tips after the combination calculation
         this.tipDelayTimeout = null;
