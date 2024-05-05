@@ -348,6 +348,14 @@ class TipBot {
     addTip(amount) {
         if(this.isOnCooldown) return;
 
+        // Check if the received amount is already in the array
+        if (this.tipAmounts.includes(amount)) {
+            console.log('Tip amount already received:', amount);
+            return; // Exit the function if the amount is already in the array
+        }
+
+
+
         console.log('Received tip amount:', amount);
         // Add tip amount to the array
         this.tipAmounts.push(amount);
