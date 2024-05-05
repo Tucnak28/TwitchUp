@@ -223,6 +223,11 @@ function activateSettings() {
             showToast('Success', 'Settings activated successfully', 'green');
         }
     })
+    .catch(error => {
+        console.error('Error activating settings:', error);
+        showToast('Error', 'Error activating settings', 'red');
+    });
+    
 }
 
 function saveConfigurations() {
