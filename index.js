@@ -741,9 +741,12 @@ function selectMainIRCClient() {
                 // Ignore echoed messages.
                 //if(self) return;
 
+                console.log(message);
+                console.log(wss.clients);
+
                 wss.clients.forEach(wsClient => {
                     if (wsClient.readyState === WebSocket.OPEN) {
-                        //console.log('Sending message to client:', message);
+                        console.log('Sending message to client:', message);
                         wsClient.send(JSON.stringify({ channel, tags, message }));
                     }
                 });  
