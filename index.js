@@ -158,7 +158,7 @@ class TipBot {
         this.perfectTip = null;
     
         // Minimum number of tips required to start the event
-        this.tipThreshold = 8;
+        this.tipThreshold = 14;
     
         // Maximum duration (in milliseconds) the event can last before automatically stopping
         this.eventDuration = 120000;
@@ -601,13 +601,15 @@ app.post('/connectWordCounters', (req, res) => {
 
 
 
+        activeAcc.forEach(account => {
+            account.wordCounters = [];
+        });
+
         // Find the connected account
         const existingAccountIndex = activeAcc.findIndex(account => account.getUsername().toLowerCase() === nickname.toLowerCase());
 
         if (existingAccountIndex !== -1) {
             const account = activeAcc[existingAccountIndex];
-
-            account.wordCounters = [];
 
             // Create a new word counter object
             const newWordCounter = new WordCounter(word_detect, word_write, threshold, timeWindow, repeat, wait, cooldown, account);
