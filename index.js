@@ -138,6 +138,8 @@ class TipBot {
     
         // Array to store the tip amounts received during the event
         this.tipAmounts = [];
+		
+		this.blacklistedTips = [1, 11, 111, 1111, 11111, 111111, 1111111, 11111111, 2, 22, 222, 2222, 22222, 22222, 222222];
     
         // Timer used to monitor the time window for reaching the tip threshold
         this.timer = null;
@@ -158,7 +160,7 @@ class TipBot {
         this.perfectTip = null;
     
         // Minimum number of tips required to start the event
-        this.tipThreshold = 14;
+        this.tipThreshold = 10;
     
         // Maximum duration (in milliseconds) the event can last before automatically stopping
         this.eventDuration = 120000;
@@ -241,10 +243,10 @@ class TipBot {
             tipToSend = Math.round(tipToSend / 10) * 10;
 
     
-            // Check if the tip is not already in the tipsForAccounts array or tipAmounts array
-            if (!this.tipAmounts.includes(tipToSend)) {
-                break; // Exit the loop since a unique tip is found
-            }
+			// Check if the tip is not already in the tipAmounts array and not in the blacklistedTips array
+			if (!this.tipAmounts.includes(tipToSend) && !blacklistedTips.includes(tipToSend)) {
+				break; // Exit the loop since a unique tip is found
+			}
     
             // Increase the percentage for the next iteration
             percent += step;
@@ -348,11 +350,11 @@ class TipBot {
     addTip(amount) {
         if(this.isOnCooldown) return;
 
-        // Check if the received amount is already in the array
-        if (this.tipAmounts.includes(amount)) {
-            console.log('Tip amount already received:', amount);
-            return; // Exit the function if the amount is already in the array
-        }
+		// Check if the received amount is already in the array or is blacklisted
+		if (this.tipAmounts.includes(amount) || this.blacklistedTips.includes(amount)) {
+			console.log('Tip amount already received or blacklisted:', amount);
+			return; // Exit the function if the amount is already in the array or blacklisted
+		}
 
 
 
