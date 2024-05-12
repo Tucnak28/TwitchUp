@@ -17,7 +17,7 @@ let mainIrcClient = null;
 let connectedChannel = null;
 
 
-const PORT = 3069;
+const PORT = 3068;
 http.listen(PORT, () => {
     console.log(`Server is running on port http://localhost:${PORT}`);
     
@@ -244,7 +244,7 @@ class TipBot {
 
     
 			// Check if the tip is not already in the tipAmounts array and not in the blacklistedTips array
-			if (!this.tipAmounts.includes(tipToSend) && !blacklistedTips.includes(tipToSend)) {
+			if (!this.tipAmounts.includes(tipToSend) && !this.blacklistedTips.includes(tipToSend)) {
 				break; // Exit the loop since a unique tip is found
 			}
     
