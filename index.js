@@ -175,7 +175,7 @@ class TipBot {
         this.tipRangePercentage = 0.25;
     
         // List of stop words that can be used to stop the event prematurely
-        this.stopWords = ["stop", "stoop", "uzavřena!", "uzavřena"];
+        this.stopWords = ["stop", "stoop", "uzavřena!", "uzavřena", "🛑"];
     }
 
 
