@@ -153,7 +153,7 @@ class TipBot {
         // Timeout used to delay sending tips after the combination calculation
         this.tipDelayTimeout = null;
     
-        // Delay (in milliseconds) before sending tips after the combination calculation
+        // Delay (in milliseconds) before sending tips after starting the event
         this.tipSendDelay = 5000;
     
         // The perfect tip amount calculated based on received tips
@@ -561,26 +561,40 @@ app.get('/checkConnections', (req, res) => {
 });
 
 
-app.post('/reconnectAccounts', (req, res) => {
+app.post('/reconnectAccounts', async (req, res) => {
     const { channel } = req.body; // Extract the channel from the request body
 
     connectedChannel = channel;
 
     // Reconnect all accounts to the specified channel
-    activeAcc.forEach(account => {
+    const results = await Promise.all(activeAcc.map(async (account) => {
+        try {
+            // Leave every channel it is joined in
+            await Promise.all(account.getChannels().map(async (joinedChannel) => {
+                await account.part(joinedChannel);
+            }));
 
-        //leave every channel it is joined in
-        account.getChannels().forEach(channel => {
-            account.part(channel);
-        });
-        
-        // Assuming `account` is an IRC client instance
-        account.join(channel); // Rejoin the specified channel
-    });
+            // Join the specified channel
+            await account.join(channel);
+            console.log(`Successfully joined channel: ${channel} for account: ${account.getUsername()}`);
+            return { account: account.getUsername(), status: 'Connected' };
+        } catch (error) {
+            console.error(`Error joining channel: ${channel} for account: ${account.getUsername()}`, error);
+            return { account: account.getUsername(), status: 'Error', error: error.message };
+        }
+    }));
 
-    // Send a success response
-    res.sendStatus(200);
+    // Check if all accounts were connected successfully
+    const allConnected = results.every(result => result.status === 'Connected');
+
+    if (allConnected) {
+        res.status(200).json({ message: 'All accounts connected successfully', results });
+    } else {
+        res.status(500).json({ message: 'Some accounts failed to connect', results });
+    }
 });
+
+
 
 app.post('/connectWordCounters', (req, res) => {
     // Extract the settings from the request body
@@ -619,7 +633,7 @@ app.post('/connectWordCounters', (req, res) => {
             // Push the new word counter to the wordCounters array of the account
             account.wordCounters.push(newWordCounter);
                       
-            console.log(nickname + ": wordCounter Connected");
+            //console.log(nickname + ": wordCounter Connected");
         }
     });
 
@@ -797,7 +811,7 @@ app.post('/toggleTipBot/:accountId', (req, res) => {
     if (index === -1) {
         // Account ID not found, add it to the activeTipbotAccounts array
         activeTipbotAccounts.push(accountIRC);
-        console.log(`TipBot ${accountId} connected.`);
+        //console.log(`TipBot ${accountId} connected.`);
         res.status(200).send('Connected');
     } else {
         // Account ID found, remove it from the activeTipbotAccounts array
