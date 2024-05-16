@@ -16,8 +16,9 @@ const wss = new WebSocket.Server({ server: http });
 let mainIrcClient = null;
 let connectedChannel = null;
 
+const { sendDiscordNotification } = require('./discordBot');
 
-const PORT = 3068;
+const PORT = 3069;
 http.listen(PORT, () => {
     console.log(`Server is running on port http://localhost:${PORT}`);
     
@@ -588,6 +589,7 @@ app.post('/reconnectAccounts', async (req, res) => {
     const allConnected = results.every(result => result.status === 'Connected');
 
     if (allConnected) {
+        sendDiscordNotification(`All Connected`);
         res.status(200).json({ message: 'All accounts connected successfully', results });
     } else {
         res.status(500).json({ message: 'Some accounts failed to connect', results });
