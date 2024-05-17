@@ -589,7 +589,6 @@ app.post('/reconnectAccounts', async (req, res) => {
     const allConnected = results.every(result => result.status === 'Connected');
 
     if (allConnected) {
-        sendDiscordNotification(`All Connected`);
         res.status(200).json({ message: 'All accounts connected successfully', results });
     } else {
         res.status(500).json({ message: 'Some accounts failed to connect', results });
@@ -757,11 +756,11 @@ function selectMainIRCClient() {
             });
 
             // Broadcast messages from Twitch IRC to all connected clients
-            mainIrcClient.on('message', (channel, tags, message, self) => {
+            mainIrcClient.on('chat', (channel, tags, message, self) => {
                 // Ignore echoed messages.
                 //if(self) return;
 
-                //console.log(message);
+                console.log(message);
                 //console.log(wss.clients);
 
                 wss.clients.forEach(wsClient => {
@@ -790,7 +789,25 @@ function selectMainIRCClient() {
                     });
                 }
 
+                
+
                 tipBot.processMessage(message);
+
+                // Extract mentioned usernames from the message
+                const mentions = message.match(/@(\w+)/g);
+                if (mentions) {
+                    const mentionedUsers = mentions.map(mention => mention.slice(1).toLowerCase()); // Remove the '@' character
+                    
+                    mentionedUsers.forEach(user => {
+                        if (activeUsernames.has(user)) {
+                            console.log('Mentioned active user:', user);
+                            sendDiscordNotification(channel, message, tags['display-name']);
+                            // Do something with the mentioned user if needed
+                            // For example, notify them or perform specific actions
+                        }
+                    });
+                    
+                }
             })
 
             return;
