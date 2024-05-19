@@ -24,9 +24,12 @@ http.listen(PORT, () => {
     
 });
 
-const discordIntegration = process.argv[3] === "true" || true; // Assuming the value is passed as a string "true" or "false"
+const discordIntegration = process.argv[3] === "true" || false; // Assuming the value is passed as a string "true" or "false"
 
-const { discord_Mention, discord_TipStarted } = require('./discordBot');
+if(discordIntegration) {
+    const { discord_Mention, discord_TipStarted } = require('./discordBot');
+}
+
 
 class WordCounter {
     constructor(word_detect, word_write, threshold, timeWindow, repeat, wait, cooldown, ircClient) {
