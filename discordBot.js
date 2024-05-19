@@ -11,7 +11,7 @@ client.once('ready', () => {
 client.login(token);
 
 // Function to send a notification
-const sendDiscordNotification = async (channelName, message, mentioner) => {
+const sendDiscordNotification = async (channelName, message, mentioner, mentionedUsers) => {
     try {
         const guild = client.guilds.cache.get(guildId);
         if (!guild) {
@@ -21,6 +21,11 @@ const sendDiscordNotification = async (channelName, message, mentioner) => {
 
         // Ensure channelName is lowercased to avoid case sensitivity issues and remove hashtags
         channelName = channelName.toLowerCase().replace(/#/g, '');
+
+        if(channelName == "") {
+            console.log("you are not connected to any channel");
+            return;
+        }
 
         let channel = guild.channels.cache.find(ch => ch.name.toLowerCase() === channelName && ch.type === 0); // 0 is the type for text channels
 
@@ -38,6 +43,14 @@ const sendDiscordNotification = async (channelName, message, mentioner) => {
             });
             console.log(`Channel created: ${channelName}`);
         }
+        // Replace each mention with the corresponding role mention
+        mentionedUsers.forEach(user => {
+            const role = guild.roles.cache.find(r => r.name.toLowerCase() === user.toLowerCase());
+            if (role) {
+                const roleMention = `<@&${role.id}>`;
+                message = message.replace(new RegExp(`@${user}`, 'g'), roleMention);
+            }
+        });
 
         // Create an embed message
         const embed = new EmbedBuilder()
@@ -45,7 +58,8 @@ const sendDiscordNotification = async (channelName, message, mentioner) => {
             .setTitle('You were mentioned!')
             .setDescription(`**${mentioner}**`)
             .addFields(
-                { name: 'Message', value: message }
+                { name: 'Message', value: message },
+                //{ name: 'Mentioned Users', value: mentionedUsers.join(', '), inline: true }
             )
             .setTimestamp()
             .setFooter({ text: 'LabTipper', iconURL: 'https://i.imgur.com/oqLjLWE.jpeg' });

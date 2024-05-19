@@ -798,15 +798,13 @@ function selectMainIRCClient() {
                 if (mentions) {
                     const mentionedUsers = mentions.map(mention => mention.slice(1).toLowerCase()); // Remove the '@' character
                     
-                    mentionedUsers.forEach(user => {
-                        if (activeUsernames.has(user)) {
-                            console.log('Mentioned active user:', user);
-                            sendDiscordNotification(channel, message, tags['display-name']);
-                            // Do something with the mentioned user if needed
-                            // For example, notify them or perform specific actions
-                        }
-                    });
+                    // Filter out active usernames from mentioned users
+                    const activeMentions = mentionedUsers.filter(user => activeUsernames.has(user));
                     
+                    if (activeMentions.length > 0) {
+                        console.log('Mentioned active users:', activeMentions);
+                        sendDiscordNotification(channel, message, tags['display-name'], activeMentions);
+                    }
                 }
             })
 
