@@ -14,9 +14,22 @@
 
 <body>
     <div id="toastContainer"></div>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col">
+    <div class="container-fluid" style="height: 100%;">
+        <div class="row" style="height: 100%;">
+            
+            <div id="sidePanel-left" class="col-auto retractable-panel">
+                <div id="chat-embed-container">
+                    <iframe
+                    src="https://www.twitch.tv/embed/none/chat?parent=localhost"
+                    id="chat-embed"
+                    scrolling="yes"
+                    height="100%"
+                    width="100%"
+                ></iframe>
+                </div>
+            </div>
+
+            <div class="col" style="height: 100%;"> 
                 <!-- Tab navigation -->
                 <ul class="nav nav-tabs" id="settingsTabs">
                     <li class="nav-item">
@@ -33,10 +46,12 @@
                     </li>
                 </ul>
 
+
                 <!-- Tab content -->
-                <div class="tab-content" id="settingsContent">
+                <div class="tab-content" id="settingsContent" style="height: 100%;">
                     <!-- Chat tab -->
                     <div class="tab-pane fade show active" id="chat" role="tabpanel" aria-labelledby="chat-tab">
+                        <!--
                         <div class="checkbox-wrapper">
                             <input type="checkbox" id="toggleUserSelect" class="styled-checkbox" checked>
                             <label for="toggleUserSelect" class="checkbox-label">Enable Nick Selection</label>
@@ -44,6 +59,7 @@
                             <input type="checkbox" id="toggleMessageSelect" class="styled-checkbox" checked>
                             <label for="toggleMessageSelect" class="checkbox-label">Enable Message Selection</label>
                         </div>
+                        -->
 
                         <div id="messageWindow">
                             <!-- Styled input box -->
@@ -56,14 +72,15 @@
                         </div>
 
                         <!-- Styled chat window -->
-                        <div id="chatWindow" class="chat-window"></div>
+                        <!--<div id="chatWindow" class="chat-window"></div> -->
+
                     </div>
 
                     <div class="tab-pane fade" id="WordDetection" role="tabpanel" aria-labelledby="WordDetection-tab">
                         <h3>Word Detection Settings</h3>
                         <p>On every occurrence of a word, there will be an action.</p>
                         
-                        <div id="activeAccountsWordCounter">
+                        <div id="activeAccountsWordCounter" class="scrollable-content">
                             <!-- Active accounts and their word counters will be appended here -->
                         </div>
                         
@@ -99,12 +116,11 @@
                 <i class="fas fa-user" style="font-size: 20px;"></i> <!-- Adjust font-size as needed -->
             </button>
 
-            <!-- Retractable side panel -->
-            <div id="sidePanel" class="col-auto retractable-panel">
+            <!-- Right side panel -->
+            <div id="sidePanel-right" class="retractable-panel">
                 <div id="channelContainer">
-                    <input type="text" id="channelInput" placeholder="Channel to connect"></input>
+                    <input type="text" id="channelInput" placeholder="Channel to connect">
                     <button id="channelButton" class="btn btn-primary" type="button">Connect</button>
-
                 </div>
                 <div id="nicknameListContainer">
                     <!-- List of nicknames -->

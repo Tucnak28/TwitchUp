@@ -28,7 +28,7 @@ function selectNickname(nicknameItem) {
 
 
 const togglePanelButton = document.getElementById('activeAccButton');
-const sidePanel = document.getElementById('sidePanel');
+const sidePanel = document.getElementById('sidePanel-right');
 
 togglePanelButton.addEventListener('click', () => {
     sidePanel.classList.toggle('retracted');
@@ -51,6 +51,9 @@ channelConnectButton.addEventListener('click', () => {
         if (response.ok) {
             // Show a success message or perform any other actions upon successful response
             console.log('Accounts reconnected successfully to channel:', channelInput);
+
+            const iframe = document.getElementById("chat-embed");
+            iframe.src = `https://www.twitch.tv/embed/${channelInput}/chat?parent=localhost`;
         } else {
             console.error('Failed to reconnect accounts');
             // Handle the failure scenario as needed

@@ -10,7 +10,7 @@ socket.addEventListener('message', function (event) {
     renderMessage({ channel, tags, message: msg });
 });
 
-
+/*
 // Get the checkbox element
 const toggleUserSelectCheckbox = document.getElementById('toggleUserSelect');
 
@@ -40,7 +40,7 @@ toggleMessageSelectCheckbox.addEventListener('change', function() {
     chatNickElements.forEach(function(element) {
         element.style.userSelect = userSelectValue;
     });
-});
+});*/
 
 
 function renderMessage({ channel, tags, message }) {

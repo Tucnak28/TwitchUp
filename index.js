@@ -17,11 +17,16 @@ let mainIrcClient = null;
 let connectedChannel = null;
 
 
-const PORT = 3068;
+
+const PORT = process.argv[2] || 3069; // Default port is 3069
 http.listen(PORT, () => {
     console.log(`Server is running on port http://localhost:${PORT}`);
     
 });
+
+const discordIntegration = process.argv[3] === "true" || true; // Assuming the value is passed as a string "true" or "false"
+
+const { discord_Mention, discord_TipStarted } = require('./discordBot');
 
 class WordCounter {
     constructor(word_detect, word_write, threshold, timeWindow, repeat, wait, cooldown, ircClient) {
@@ -69,7 +74,7 @@ class WordCounter {
     }
 
     triggerAction() {
-        console.log(`${new Date()} detected "${this.word_detect}"`);
+        console.log(`"${this.ircClient.getUsername()}: ${this.word_detect}"`);
 
         let rndRepeat = this.repeat; // Default value if repeat is not -1
 
@@ -186,6 +191,9 @@ class TipBot {
         clearTimeout(this.timer);
 
         console.log('Starting tip combination timeout...');
+
+        if(discordIntegration) discord_TipStarted(connectedChannel);
+
         this.tipDelayTimeout = setTimeout(() => {
 
             this.sendTips();
@@ -600,6 +608,10 @@ app.post('/connectWordCounters', (req, res) => {
     // Extract the settings from the request body
     const wordCounters = req.body.word_counters;
 
+    activeAcc.forEach(account => {
+        account.wordCounters = [];
+    });
+
     // Log the settings
     //console.log('Word Counters Settings:');
     wordCounters.forEach((counter, index) => {
@@ -616,11 +628,6 @@ app.post('/connectWordCounters', (req, res) => {
         console.log('\n');*/
 
 
-
-        activeAcc.forEach(account => {
-            account.wordCounters = [];
-        });
-
         // Find the connected account
         const existingAccountIndex = activeAcc.findIndex(account => account.getUsername().toLowerCase() === nickname.toLowerCase());
 
@@ -633,7 +640,7 @@ app.post('/connectWordCounters', (req, res) => {
             // Push the new word counter to the wordCounters array of the account
             account.wordCounters.push(newWordCounter);
                       
-            //console.log(nickname + ": wordCounter Connected");
+            console.log(nickname + ": wordCounter Connected");
         }
     });
 
@@ -754,6 +761,7 @@ function selectMainIRCClient() {
                 selectMainIRCClient();
             });
 
+
             // Broadcast messages from Twitch IRC to all connected clients
             mainIrcClient.on('message', (channel, tags, message, self) => {
                 // Ignore echoed messages.
@@ -789,6 +797,20 @@ function selectMainIRCClient() {
                 }
 
                 tipBot.processMessage(message);
+
+                // Extract mentioned usernames from the message
+                const mentions = message.match(/@(\w+)/g);
+                if (mentions) {
+                    const mentionedUsers = mentions.map(mention => mention.slice(1).toLowerCase()); // Remove the '@' character
+                    
+                    // Filter out active usernames from mentioned users
+                    const activeMentions = mentionedUsers.filter(user => activeUsernames.has(user));
+                    
+                    if (activeMentions.length > 0) {
+                        console.log('Mentioned active users:', activeMentions);
+                        if(discordIntegration) discord_Mention(channel, message, tags['display-name'], activeMentions);
+                    }
+                }
             })
 
             return;
