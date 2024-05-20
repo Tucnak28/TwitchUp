@@ -2,3 +2,4 @@
 accounts.json
 .vscode/settings.json
 wordCounters_config.json
+.env

@@ -19,15 +19,19 @@ let connectedChannel = null;
 
 
 const PORT = process.argv[2] || 3069; // Default port is 3069
+
 http.listen(PORT, () => {
     console.log(`Server is running on port http://localhost:${PORT}`);
     
 });
 
-const discordIntegration = process.argv[3] === "true" || false; // Assuming the value is passed as a string "true" or "false"
 
-if(discordIntegration) {
-    const { discord_Mention, discord_TipStarted } = require('./discordBot');
+const discordIntegration = process.argv[3] === "True"; // Assuming the value is passed as a string "true" or "false"
+
+let discord_Mention, discord_TipStarted;
+
+if (discordIntegration) {
+    ({ discord_Mention, discord_TipStarted } = require('./discordBot'));
 }
 
 

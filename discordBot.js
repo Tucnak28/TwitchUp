@@ -1,8 +1,12 @@
 const { Client, GatewayIntentBits, PermissionsBitField, EmbedBuilder } = require('discord.js');
+require('dotenv').config();
+
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
 
-const token = 'nuh uh'; // Replace with your bot token
-const guildId = 'nuh uh'; // Replace with your Discord guild ID
+const token = process.env.DISCORD_TOKEN; // Replace with your bot token
+const guildId = process.env.GUILD_ID; // Replace with your Discord guild ID
+
+
 
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
