@@ -91,13 +91,14 @@ class WordCounter {
 
         const textToSend = concatenateString(this.word_write, rndRepeat);
 
+        // Start cooldown period
+        this.isOnCooldown = true;
+
         // Wait for the specified time before sending the message
         setTimeout(() => {
             // Send the message to the IRC client's channels
             this.ircClient.say(this.ircClient.channels.toString(), textToSend);
 
-            // Start cooldown period
-            this.isOnCooldown = true;
             setTimeout(() => {
                 console.log('Cooldown period ended.');
                 this.isOnCooldown = false;
@@ -123,7 +124,7 @@ class WordCounter {
 
     processWord(inputWord) {
         // Check if the input word matches the target word
-        if (inputWord.includes(this.word_detect)) {
+        if (inputWord.includes(this.word_detect) && !this.isOnCooldown) {
             // Increment the counter and reset timer
             this.incrementCounter();
             clearTimeout(this.timer);
