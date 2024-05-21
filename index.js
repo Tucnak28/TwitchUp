@@ -114,7 +114,6 @@ class WordCounter {
 
     resetCounter() {
         this.counter = 0;
-        console.log('Counter reset');
         clearTimeout(this.timer);
         // Set a timer to reset the counter after the time window
         this.timer = setTimeout(() => {
