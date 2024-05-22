@@ -1,12 +1,18 @@
-// Define a class for managing a GPT-based chatbot
-import OpenAI from "openai";
+// Import the OpenAI package
+const OpenAI = require('openai');
 
-const openai = new OpenAI();
+// Define a class for representing a message
+class Message {
+    constructor(username, message) {
+        this.username = username;
+        this.message = message;
+    }
+}
 
 console.log("successfully conencted to GPT");
 
 class GPTBot {
-    constructor(bufferSize = 100) {
+    constructor(bufferSize = 30, notificationInterval = 5) {
         // Initialize the token from environment variable
         this.token = process.env.OPENAI_TOKEN;
 
@@ -15,25 +21,22 @@ class GPTBot {
 
         // Set the maximum buffer size
         this.bufferSize = bufferSize;
+
+        // Initialize the OpenAI client
+        this.openai = new OpenAI({ apiKey: this.token });
+
+        // Initialize the counter for tracking messages
+        this.messageCounter = 0;
+
+        // Set the notification interval
+        this.notificationInterval = notificationInterval;
     }
 
     // Method to send a message using the GPT-based chatbot
-    sendMessage(username, message) {
+    addMessage(username, message) {
         // Create a message object
         const msg = new Message(username, message);
 
-        // Add message to chat buffer
-        this.addToBuffer(msg);
-
-        // Process the message using the GPT-based chatbot and send a response
-        // Implement this part based on your interaction with the OpenAI API
-        // Example:
-        // const response = this.generateResponse(message);
-        // this.sendResponse(username, response);
-    }
-
-    // Method to add a message to the chat buffer
-    addToBuffer(message) {
         // Check if the buffer size exceeds the maximum limit
         if (this.chatBuffer.length >= this.bufferSize) {
             // Remove the oldest message from the buffer
@@ -42,12 +45,28 @@ class GPTBot {
 
         // Add the new message to the buffer
         this.chatBuffer.push(message);
+
+        // Increment the message counter
+        this.messageCounter++;
+
+        // Check if the counter reaches the notification interval
+        if (this.messageCounter % this.notificationInterval === 0) {
+            this.generateResponse(this.chatBuffer);
+        }
+
     }
 
     // Method to generate a response using the GPT-based chatbot
-    async generateResponse(message) {
+    async generateResponse(instructions, chatBuffer) {
+        // Transform the chat buffer into a string formatted for GPT
+        const chatTranscript = chatBuffer.map(message => `${message.username}: ${message.message}`).join('\n');
+
+        // Concatenate instructions with the chat transcript
+        const content = `${instructions}\n${chatTranscript}`;
+
+        // Generate response using the GPT-based chatbot
         const completion = await openai.chat.completions.create({
-            messages: [{ role: "system", content: "You are a helpful assistant." }],
+            messages: [{ role: "system", content }],
             model: "gpt-3.5-turbo",
         });
 
@@ -55,6 +74,7 @@ class GPTBot {
 
         return completion.choices[0];
     }
+
 }
 
 // Export the class for use in other modules
