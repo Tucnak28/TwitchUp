@@ -26,8 +26,8 @@ http.listen(PORT, () => {
 });
 
 
-const discordIntegration = process.argv[3] === "True"; // Assuming the value is passed as a string "true" or "false"
-//const GPTIntegration = process.argv[4] === "True"; // Assuming the value is passed as a string "true" or "false"
+const discordIntegration = process.argv[3] === "True" || true; // Assuming the value is passed as a string "true" or "false"
+const GPTIntegration = process.argv[4] === "True" || true; // Assuming the value is passed as a string "true" or "false"
 
 let discord_Mention, discord_TipStarted;
 
@@ -35,6 +35,11 @@ if (discordIntegration) {
     ({ discord_Mention, discord_TipStarted } = require('./discordBot'));
 }
 
+let GPTbot;
+
+if(GPTIntegration) {
+    ({ GPTbot } = require("./gptBot"));
+}
 
 class WordCounter {
     constructor(word_detect, word_write, threshold, timeWindow, repeat, wait, cooldown, ircClient) {
@@ -770,6 +775,7 @@ app.post('/saveWordCounters', (req, res) => {
 
 
 const tipBot = new TipBot();
+const gptBot = new GPTbot();
 
 // Function to select an active IRC client from activeAcc
 function selectMainIRCClient() {
