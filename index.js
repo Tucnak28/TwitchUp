@@ -27,6 +27,7 @@ http.listen(PORT, () => {
 
 
 const discordIntegration = process.argv[3] === "True"; // Assuming the value is passed as a string "true" or "false"
+//const GPTIntegration = process.argv[4] === "True"; // Assuming the value is passed as a string "true" or "false"
 
 let discord_Mention, discord_TipStarted;
 
@@ -142,6 +143,7 @@ function concatenateString(str, times) {
     }
     return result;
 }
+
 
 class TipBot {
     constructor() {
