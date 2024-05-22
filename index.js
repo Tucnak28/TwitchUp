@@ -100,7 +100,7 @@ class WordCounter {
             this.ircClient.say(this.ircClient.channels.toString(), textToSend);
 
             setTimeout(() => {
-                console.log('Cooldown period ended.');
+                //console.log('Cooldown period ended.');
                 this.isOnCooldown = false;
             }, this.cooldown);
         }, this.wait);
@@ -128,7 +128,7 @@ class WordCounter {
             this.incrementCounter();
             clearTimeout(this.timer);
             this.timer = setTimeout(() => {
-                console.log('Timer expired. Counter reset.');
+                //console.log('Timer expired. Counter reset.');
                 this.counter = 0;
             }, this.timeWindow);
         }
