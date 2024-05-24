@@ -39,6 +39,28 @@ body, html {
     width: 100%; /* Set the width to 100% */
 }
 
+#twitch-embed-container {
+    width: 100%;
+    height: 100vh; /* Full viewport height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 0;
+}
+
+#twitch-embed {
+    width: 100%; 
+    height: 100%; 
+}
+
+.twitch-embed-wrapper {
+    width: 100%; /* Adjust width as necessary */
+    height: 80%; /* Adjust height as necessary */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .toast {
     position: fixed;
     top: 20px;

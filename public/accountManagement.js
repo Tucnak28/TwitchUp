@@ -54,6 +54,19 @@ channelConnectButton.addEventListener('click', () => {
 
             const iframe = document.getElementById("chat-embed");
             iframe.src = `https://www.twitch.tv/embed/${channelInput}/chat?parent=localhost`;
+
+            var embed = new Twitch.Embed("twitch-embed", {
+                width: "90%",
+                height: "90%",
+                channel: channelInput,
+                layout: "video",
+                autoplay: true,
+            });
+
+            embed.addEventListener(Twitch.Embed.VIDEO_READY, () => {
+                var player = embed.getPlayer();
+                player.play();
+            });
         } else {
             console.error('Failed to reconnect accounts');
             // Handle the failure scenario as needed
