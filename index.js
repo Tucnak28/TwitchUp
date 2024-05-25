@@ -29,20 +29,21 @@ http.listen(PORT, () => {
 });
 
 
-const discordIntegration = process.argv[3] === "True" || true; // Assuming the value is passed as a string "true" or "false"
-const GPTIntegration = process.argv[4] === "True" || true; // Assuming the value is passed as a string "true" or "false"
+const discordIntegration = process.argv[3] == "True"; // Assuming the value is passed as a string "true" or "false"
+const GPTIntegration = process.argv[4] == "True"; // Assuming the value is passed as a string "true" or "false"
 
 let discord_Mention, discord_TipStarted;
 
 if (discordIntegration) {
-    ({ discord_Mention, discord_TipStarted } = require('./discordBot'));
+    ({ discord_Mention, discord_TipStarted } = require("./discordBot"));
 }
 
-let GPTbot;
+let GPTBot;
 
 if(GPTIntegration) {
-    ({ GPTbot } = require("./gptBot"));
+    GPTBot = require("./gptBot");
 }
+
 
 class WordCounter {
     constructor(word_detect, word_write, threshold, timeWindow, repeat, wait, cooldown, ircClient) {
@@ -424,6 +425,13 @@ function shuffleArray(array) {
 
 
 
+const tipBot = new TipBot();
+
+let gptBot;
+
+if(GPTIntegration) {
+    gptBot = new GPTBot();
+}
 
 
 
@@ -776,10 +784,6 @@ app.post('/saveWordCounters', (req, res) => {
 });
 
 
-
-const tipBot = new TipBot();
-const gptBot = new GPTbot();
-
 // Function to select an active IRC client from activeAcc
 function selectMainIRCClient() {
     // Loop through activeAcc to find an IRC client that is open
@@ -831,6 +835,10 @@ function selectMainIRCClient() {
                 }
 
                 tipBot.processMessage(message);
+                
+                if(GPTIntegration) {
+                    gptBot.addMessage(tags['display-name'], message)
+                }
 
                 // Extract mentioned usernames from the message
                 const mentions = message.match(/@(\w+)/g);
