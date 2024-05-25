@@ -7,6 +7,9 @@ const fs = require('fs'); // Import the 'fs' module to read the JSON file
 const bodyParser = require('body-parser'); // Import bodyParser module
 const { randomInt } = require('crypto');
 
+//To load environment variables
+require('dotenv').config();
+
 // Serve static files from the 'public' directory
 app.use(express.static('public'));
 app.use(bodyParser.json());
