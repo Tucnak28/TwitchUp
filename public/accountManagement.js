@@ -55,6 +55,12 @@ channelConnectButton.addEventListener('click', () => {
             const iframe = document.getElementById("chat-embed");
             iframe.src = `https://www.twitch.tv/embed/${channelInput}/chat?parent=localhost`;
 
+            const videoDiv = document.getElementById("twitch-embed");
+
+            while (videoDiv.firstChild) {
+                videoDiv.removeChild(videoDiv.firstChild);
+            }
+
             var embed = new Twitch.Embed("twitch-embed", {
                 width: "90%",
                 height: "90%",
