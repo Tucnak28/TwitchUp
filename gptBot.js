@@ -29,7 +29,25 @@ class GPTBot {
         // Set the notification interval
         this.notificationInterval = notificationInterval;
 
-        this.instructions = "1) Analyze the context 2) Blend in naturally 3) Maintain coherence 4) Mimic chat behavior 5) Avoid direct interactions 6) Talk in the same language as chat 7) Answer in a JSON (username and message) 8) your name is labtipper 9) your message will directly go to chat";
+        this.instructions = `1) Understand the Context: Analyze the chat context to understand the ongoing conversation.
+        2) Blend in Naturally: Your messages should seamlessly blend into the chat, appearing as if a human wrote them.
+        3) Maintain Coherence: Ensure your responses are coherent and relevant to the preceding messages.
+        4) Mimic Chat Behavior: Write like a typical Twitch user, using slang, abbreviations, or emotes.
+        5) Avoid Direct Interactions: Do not directly address other users or respond to specific questions. Instead, make general comments that fit the chat’s flow.
+        6) Language Consistency: Write in the same language as the chat, which is Czech in this case.
+        7) Format in JSON
+        9) Message Suitability: Your message should be suitable to send directly to the chat without drawing unnecessary attention.
+        10) Write Like a Twitch User: Use typical Twitch chat language, which is usually short, energetic, and may include emotes. Use common Twitch emotes such as "PogChamp", "LUL", "<3", "Kappa", etc.
+        11) Message Length: Keep your messages short, preferably up to three words. 
+        12) Provide a message for each of the usernames listed below, ensuring each message follows the rules above:
+        
+        [
+            {"username": "labtipper", "message": ""},
+            {"username": "bobicek588", "message": ""},
+            {"username": "tucnak28", "message": ""},
+            {"username": "mareceklap", "message": ""}
+        ]
+        `;
     }
 
     // Method to send a message using the GPT-based chatbot
