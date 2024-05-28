@@ -185,6 +185,8 @@ class TipBot {
     
         // Percentage range around the perfect tip used to calculate unique tips
         this.tipRangePercentage = 0.25;
+
+        this.toggle = true;
     
         // List of stop words that can be used to stop the event prematurely
         this.stopWords = ["stop", "stoop", "uzavřena!", "uzavřena", "🛑"];
@@ -227,6 +229,7 @@ class TipBot {
         shuffledActiveAcc.forEach((account, index) => {
             setTimeout(() => {
                 if(!this.eventRunning) return;
+                if(!this.toggle) return;
 
                 this.perfectTip = this.calculateMedian(this.tipAmounts);
 
@@ -237,15 +240,11 @@ class TipBot {
                 console.log(`Tip for ${account.getUsername()}: ${tipToSend}`);
                 account.say(account.channels.toString(), tipToSend.toString());
 
-                
-    
                 // Reset the perfectTip and tipAmounts array after logging the tip for each account
                 if (index === shuffledActiveAcc.length - 1) {
                     console.log("All account sent their tips");
-                    //this.resetTipAmounts();
-                    //this.eventRunning = false;
                 }
-            }, index * (this.sendTimeWindow / activeAcc.length)); // Delay each iteration by 20 seconds (index * 20000 milliseconds)
+            }, index * (this.sendTimeWindow / activeAcc.length)); // Delay each iteration by the appropriate amount of time
         });
 
         this.startEventTimer();
@@ -269,7 +268,6 @@ class TipBot {
             tipToSend = Math.floor(Math.random() * (max - min + 1)) + min;
             tipToSend = Math.round(tipToSend / 10) * 10;
 
-    
 			// Check if the tip is not already in the tipAmounts array and not in the blacklistedTips array
 			if (!this.tipAmounts.includes(tipToSend) && !this.blacklistedTips.includes(tipToSend)) {
 				break; // Exit the loop since a unique tip is found
@@ -336,6 +334,7 @@ class TipBot {
     }
 
     processMessage(message) {
+        if(!this.toggle) return;
         const trimmedMessage = message.replace(/\s+/g, '');
 
         // Check if the message contains "stop"
@@ -839,7 +838,7 @@ function selectMainIRCClient() {
     console.log('No active IRC client found.');
 }
 
-app.post('/toggleTipBot/:accountId', (req, res) => {
+app.post('/toggleTipBotAccount/:accountId', (req, res) => {
     const accountId = req.params.accountId;
 
     const accountIRC = activeAcc.find(account => account.getUsername().toLowerCase() === accountId.toLowerCase());
@@ -866,4 +865,16 @@ app.post('/resetTipBot/', (req, res) => {
     tipBot.resetAll();
 
     res.sendStatus(200);
+});
+
+app.post('/toggleTipBot/', (req, res) => {
+    tipBot.toggle = !tipBot.toggle;
+
+    if (tipBot.toggle) {
+        console.log(`TipBot toggled on`);
+        res.status(200).send('Connected');
+    } else {
+        console.log(`TipBot toggled off`);
+        res.status(200).send('Disconnected');
+    }
 });

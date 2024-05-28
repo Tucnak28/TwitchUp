@@ -53,7 +53,7 @@ function createTipBotToggle(account) {
 
 // Function to toggle the TipBot connection for an account
 function toggleTipBotConnection(button, accountId) {
-    fetch(`/toggleTipBot/${accountId}`, { method: 'POST' })
+    fetch(`/toggleTipBotAccount/${accountId}`, { method: 'POST' })
     .then(response => {
         if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -97,3 +97,29 @@ document.getElementById("resetTipButton").onclick = () => {
         showToast('Error resetting TipBot', 'red');
     });
 };
+
+document.getElementById("toggleTipButton").onclick = () => {
+    const button = document.getElementById("toggleTipButton");
+
+    fetch(`/toggleTipBot/`, { method: 'POST' })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.text(); // This returns a promise containing the text value
+    })
+    .then(statusText => {
+        console.log("Status Text: " + statusText);
+
+        const successMessage = statusText === "Connected" ? 'TipBot is online' : 'TipBot is offline';
+        const isSuccess = statusText === "Connected";
+
+        updateConnectionStatus(button, isSuccess);
+        showToast(isSuccess ? 'Success' : 'Error', successMessage, isSuccess ? 'green' : 'red');
+    })
+    .catch(error => {
+        console.error('Error toggling Tipbot:', error);
+        showToast('Error', 'Error toggling Tipbot', 'red');
+    });
+};
+
