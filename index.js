@@ -190,6 +190,19 @@ class TipBot {
         this.stopWords = ["stop", "stoop", "uzavřena!", "uzavřena", "🛑"];
     }
 
+    resetAll() {
+        console.log('Performing a factory reset...');
+
+        this.eventRunning = false;
+        this.isOnCooldown = false;
+        this.tipAmounts = [];
+        this.perfectTip = null;
+        clearTimeout(this.tipDelayTimeout);
+        clearTimeout(this.timer);
+
+        console.log('All tips and cooldowns have been reset.');
+
+    }
 
     processTips() {
         this.eventRunning = true;
@@ -848,4 +861,10 @@ app.post('/toggleTipBot/:accountId', (req, res) => {
         console.log(`TipBot ${accountId} disconnected.`);
         res.status(200).send('Disconnected');
     }
+});
+
+app.post('/resetTipBot/', (req, res) => {
+    tipBot.resetAll();
+
+    res.sendStatus(200);
 });

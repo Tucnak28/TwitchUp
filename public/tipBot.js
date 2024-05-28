@@ -82,3 +82,18 @@ function updateConnectionStatus(button, isSuccess) {
         button.classList.remove('on');
     }
 }
+
+document.getElementById("resetTipButton").onclick = () => {
+    fetch(`/resetTipBot/`, { method: 'POST' })
+    .then(response => {
+        if(response.ok) {
+            showToast('Success', "Tipbot is in factory state", 'green');
+        } else {
+            showToast('Error', 'Failed to reset TipBot', 'red');
+        }
+    })
+    .catch(error => {
+        console.error('Error resetting TipBot:', error);
+        showToast('Error resetting TipBot', 'red');
+    });
+};
