@@ -191,7 +191,6 @@ class TipBot {
     }
 
     resetAll() {
-        console.log('Performing a factory reset...');
 
         this.eventRunning = false;
         this.isOnCooldown = false;
