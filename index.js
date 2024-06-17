@@ -151,7 +151,7 @@ class TipBot {
         // Array to store the tip amounts received during the event
         this.tipAmounts = [];
 		
-		this.blacklistedTips = [1, 11, 111, 1111, 11111, 111111, 1111111, 11111111, 2, 22, 222, 2222, 22222, 22222, 222222];
+		this.blacklistedTips = [1, 11, 111, 1111, 11111, 111111, 1111111, 11111111, 2, 22, 222, 2222, 22222, 22222, 222222, 2222222];
     
         // Timer used to monitor the time window for reaching the tip threshold
         this.timer = null;
@@ -562,6 +562,13 @@ app.post('/toggleConnection/:accountId', (req, res) => {
 
 
     });
+
+    accountClient.on("disconnected", (reason) => {
+        console.log(`Account ${accountClient.getUsername()} disconnected: ${reason}`);
+    });
+
+
+
 });
 
 // Endpoint to periodically check the connection status of accounts
