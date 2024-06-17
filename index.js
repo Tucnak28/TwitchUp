@@ -517,7 +517,7 @@ app.post('/toggleConnection/:accountId', (req, res) => {
         activeAcc.splice(existingAccountIndex, 1);
 
         // Log and send response
-        console.log(`Account ${existingAccount.getUsername()} disconnected`);
+        //console.log(`Account ${existingAccount.getUsername()} disconnected`);
         
         res.send("Disconnected");
         return;
@@ -563,7 +563,7 @@ app.post('/toggleConnection/:accountId', (req, res) => {
 
     });
 
-    accountClient.on("disconnected", (reason) => {
+    accountClient.once("disconnected", (reason) => {
         console.log(`Account ${accountClient.getUsername()} disconnected: ${reason}`);
     });
 
@@ -780,9 +780,7 @@ function selectMainIRCClient() {
 
 
             // WebSocket event listener to monitor the state of the main IRC client
-            mainIrcClient.once('disconnected', (code, reason) => {
-                console.log(`Main IRC client disconnected with code ${code}: ${reason}`);
-                // Select a new main IRC client whenever the main client disconnects
+            mainIrcClient.once('disconnected', (reason) => {
                 selectMainIRCClient();
             });
 
