@@ -1,7 +1,7 @@
 import tkinter as tk
 import subprocess
 
-def getSettings(default_port="8000"):
+def getSettings(default_port="8008"):
     root = tk.Tk()
     root.withdraw()  # Hide the main window
 
