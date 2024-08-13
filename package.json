@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "Twitch client for professional bettors",
   "main": "index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -12,6 +11,7 @@
     "discord.js": "^14.15.2",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "openai": "^4.47.1",
     "tmi.js": "^1.8.5"
   }
 }

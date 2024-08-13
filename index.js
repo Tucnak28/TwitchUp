@@ -7,6 +7,9 @@ const fs = require('fs'); // Import the 'fs' module to read the JSON file
 const bodyParser = require('body-parser'); // Import bodyParser module
 const { randomInt } = require('crypto');
 
+//To load environment variables
+require('dotenv').config();
+
 // Serve static files from the 'public' directory
 app.use(express.static('public'));
 app.use(bodyParser.json());
@@ -26,12 +29,19 @@ http.listen(PORT, () => {
 });
 
 
-const discordIntegration = process.argv[3] === "True"; // Assuming the value is passed as a string "true" or "false"
+const discordIntegration = process.argv[3] == "True"; // Assuming the value is passed as a string "true" or "false"
+const GPTIntegration = process.argv[4] == "True"; // Assuming the value is passed as a string "true" or "false"
 
 let discord_Mention, discord_TipStarted;
 
 if (discordIntegration) {
-    ({ discord_Mention, discord_TipStarted } = require('./discordBot'));
+    ({ discord_Mention, discord_TipStarted } = require("./discordBot"));
+}
+
+let GPTBot;
+
+if(GPTIntegration) {
+    GPTBot = require("./gptBot");
 }
 
 
@@ -142,6 +152,7 @@ function concatenateString(str, times) {
     }
     return result;
 }
+
 
 class TipBot {
     constructor() {
@@ -414,6 +425,13 @@ function shuffleArray(array) {
 
 
 
+const tipBot = new TipBot();
+
+let gptBot;
+
+if(GPTIntegration) {
+    gptBot = new GPTBot();
+}
 
 
 
@@ -766,9 +784,6 @@ app.post('/saveWordCounters', (req, res) => {
 });
 
 
-
-const tipBot = new TipBot();
-
 // Function to select an active IRC client from activeAcc
 function selectMainIRCClient() {
     // Loop through activeAcc to find an IRC client that is open
@@ -820,6 +835,10 @@ function selectMainIRCClient() {
                 }
 
                 tipBot.processMessage(message);
+                
+                if(GPTIntegration) {
+                    gptBot.addMessage(tags['display-name'], message)
+                }
 
                 // Extract mentioned usernames from the message
                 const mentions = message.match(/@(\w+)/g);
