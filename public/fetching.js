@@ -197,3 +197,39 @@ const intervalId = setInterval(checkConnections, 1000);
 // To stop the periodic fetching, you can use clearInterval with the intervalId:
 // clearInterval(intervalId);
 
+
+// Attach the event listener on DOMContentLoaded or after the document is ready
+document.addEventListener('DOMContentLoaded', function() {
+    const desiredEndingInput = document.getElementById('desiredEndingInput');
+
+    desiredEndingInput.addEventListener('input', function() {
+        // Function to execute on every change
+        onDesiredEndingChange();
+    });
+});
+
+function onDesiredEndingChange() {
+    const desiredEndingInput = document.getElementById('desiredEndingInput');
+    const desiredEnding = parseInt(desiredEndingInput.value, 10) || 0;
+
+    // Send the desiredEnding as a JSON object
+    fetch('/changeDesiredEnding', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ desiredEnding: desiredEnding }) // Corrected: Stringify the desired ending
+    })
+    .then(response => {
+        if (response.ok) {
+
+        } else {
+            console.error('Failed to change Desired Ending');
+            throw new Error('Failed to change Desired Ending');
+        }
+    })
+    .catch(error => {
+        console.error('Error changing Desired Ending:', error);
+    });
+}
+

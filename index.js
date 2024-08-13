@@ -19,6 +19,8 @@ const wss = new WebSocket.Server({ server: http });
 let mainIrcClient = null;
 let connectedChannel = null;
 
+let desiredEnding = 0;
+
 
 
 const PORT = process.argv[2] || 3069; // Default port is 3069
@@ -192,11 +194,11 @@ class TipBot {
         this.isOnCooldown = false;
     
         // Duration (in milliseconds) of the cooldown period
-        this.cooldownDuration = 100000;
+        this.cooldownDuration = 130000;
     
         // Percentage range around the perfect tip used to calculate unique tips
         this.tipRangePercentage = 0.25;
-
+        
         this.toggle = true;
     
         // List of stop words that can be used to stop the event prematurely
@@ -263,40 +265,43 @@ class TipBot {
     
     calculateUniqueTip() {
         let tipToSend = Math.round(this.perfectTip / 10) * 10;
-    
+        
         // Gradually increase the percentage around 30% of the roundedPerfectTip
         let percent = this.tipRangePercentage; // Initial percentage
         const step = 0.5; // Step to increase the percentage
         const maxPercent = 100; // Maximum percentage
-    
+        
         // Loop until a unique tip is generated or maximum percentage is reached
         while (true) {
             // Calculate the range based on the current percentage
             const min = Math.max(0, Math.round(this.perfectTip * (1 - percent)));
             const max = Math.round(this.perfectTip * (1 + percent));
-    
+        
             // Generate a random tip within the range
             tipToSend = Math.floor(Math.random() * (max - min + 1)) + min;
-            tipToSend = Math.round(tipToSend / 10) * 10;
-
-			// Check if the tip is not already in the tipAmounts array and not in the blacklistedTips array
-			if (!this.tipAmounts.includes(tipToSend) && !this.blacklistedTips.includes(tipToSend)) {
-				break; // Exit the loop since a unique tip is found
-			}
+    
+            // Adjust the tipToSend to end with the desiredEnding number
+            tipToSend = Math.floor(tipToSend / 10) * 10 + desiredEnding;
+    
+            // Check if the tip is not already in the tipAmounts array and not in the blacklistedTips array
+            if (!this.tipAmounts.includes(tipToSend) && !this.blacklistedTips.includes(tipToSend)) {
+                break; // Exit the loop since a unique tip is found
+            }
     
             // Increase the percentage for the next iteration
             percent += step;
-    
+        
             // Check if maximum percentage is reached
             if (percent >= maxPercent) {
                 console.log("Maximum percentage reached. Cannot find a unique tip.");
                 break; // Exit the loop since maximum percentage is reached
             }
         }
-
-                                   //this.tipAmounts.push(tipToSend); //remove this later, because the tip will be added automatically because the tip will be in chat
+    
+        //this.tipAmounts.push(tipToSend); //remove this later, because the tip will be added automatically because the tip will be in chat
         return tipToSend;
     }
+    
     
     
     
@@ -430,7 +435,7 @@ const tipBot = new TipBot();
 let gptBot;
 
 if(GPTIntegration) {
-    gptBot = new GPTBot();
+    //gptBot = new GPTBot();
 }
 
 
@@ -645,6 +650,13 @@ app.post('/reconnectAccounts', async (req, res) => {
     }
 });
 
+
+// Route to handle the POST request
+app.post('/changeDesiredEnding', (req, res) => {
+    desiredEnding = req.body.desiredEnding;
+
+    res.status(200).end();
+});
 
 
 app.post('/connectWordCounters', (req, res) => {
