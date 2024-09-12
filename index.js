@@ -279,6 +279,8 @@ class TipBot {
         
             // Generate a random tip within the range
             tipToSend = Math.floor(Math.random() * (max - min + 1)) + min;
+
+            if(desiredEnding == -1) desiredEnding = Math.floor(Math.random() * 10);
     
             // Adjust the tipToSend to end with the desiredEnding number
             tipToSend = Math.floor(tipToSend / 10) * 10 + desiredEnding;
