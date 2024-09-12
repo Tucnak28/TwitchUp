@@ -280,10 +280,15 @@ class TipBot {
             // Generate a random tip within the range
             tipToSend = Math.floor(Math.random() * (max - min + 1)) + min;
 
-            if(desiredEnding == -1) desiredEnding = Math.floor(Math.random() * 10);
-    
-            // Adjust the tipToSend to end with the desiredEnding number
-            tipToSend = Math.floor(tipToSend / 10) * 10 + desiredEnding;
+
+            //if Random
+            if(desiredEnding == -1) {
+                // Adjust the tipToSend to end with the desiredEnding number
+                tipToSend = Math.floor(tipToSend / 10) * 10 + Math.floor(Math.random() * 10);
+            } else {
+                tipToSend = Math.floor(tipToSend / 10) * 10 + desiredEnding;
+            }
+
     
             // Check if the tip is not already in the tipAmounts array and not in the blacklistedTips array
             if (!this.tipAmounts.includes(tipToSend) && !this.blacklistedTips.includes(tipToSend)) {
