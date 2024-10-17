@@ -859,8 +859,9 @@ function selectMainIRCClient() {
                     gptBot.addMessage(tags['display-name'], message)
                 }
 
+                //Method for @ mentioning
                 // Extract mentioned usernames from the message
-                const mentions = message.match(/@(\w+)/g);
+                /*const mentions = message.match(/@(\w+)/g);
                 if (mentions) {
                     const mentionedUsers = mentions.map(mention => mention.slice(1).toLowerCase()); // Remove the '@' character
                     
@@ -870,6 +871,22 @@ function selectMainIRCClient() {
                     if (activeMentions.length > 0) {
                         console.log('Mentioned active users:', activeMentions);
                         if(discordIntegration) discord_Mention(channel, message, tags['display-name'], activeMentions);
+                    }
+                }*/
+
+                //Method for mentioning using the names
+                // Split the message into words and check if any of them match active usernames (with or without '@')
+                const words = message.split(/\s+/); // Split message into words based on spaces or multiple spaces
+
+                // Filter out active usernames from the message
+                const activeMentions = words
+                    .map(word => word.replace(/^@/, '').toLowerCase()) // Remove '@' if present and normalize to lowercase
+                    .filter(word => activeUsernames.has(word)); // Check if the word is an active username
+
+                if (activeMentions.length > 0) {
+                    console.log('Mentioned active users:', activeMentions);
+                    if (discordIntegration) {
+                        discord_Mention(channel, message, tags['display-name'], activeMentions);
                     }
                 }
             })

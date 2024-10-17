@@ -25,8 +25,8 @@ const discord_Mention = async (channelName, message, mentioner, mentionedUsers) 
         // Ensure channelName is lowercased to avoid case sensitivity issues and remove hashtags
         channelName = channelName.toLowerCase().replace(/#/g, '');
 
-        if(channelName == "") {
-            console.log("you are not connected to any channel");
+        if (channelName === "") {
+            console.log("You are not connected to any channel");
             return;
         }
 
@@ -47,14 +47,23 @@ const discord_Mention = async (channelName, message, mentioner, mentionedUsers) 
             console.log(`Channel created: ${channelName}`);
         }
 
-        // Replace each mention with the corresponding role mention
-        mentionedUsers.forEach(user => {
-            const role = guild.roles.cache.find(r => r.name.toLowerCase() === user.toLowerCase());
+        // Process mentioned users and ensure they all have '@' at the start
+        const formattedMentions = mentionedUsers.map(user => {
+            // Add '@' if it's not already there
+            return user.startsWith('@') ? user : `@${user}`;
+        });
+
+        // Replace each mention with the corresponding role mention if a matching role is found
+        formattedMentions.forEach(user => {
+            const username = user.replace(/^@/, '').toLowerCase(); // Remove '@' for role search
+            const role = guild.roles.cache.find(r => r.name.toLowerCase() === username);
             if (role) {
                 const roleMention = `<@&${role.id}>`;
-                message = message.replace(new RegExp(`@${user}`, 'g'), roleMention);
+                // Replace both '@username' and 'username' (without @) in the message
+                message = message.replace(new RegExp(`@?${username}`, 'gi'), roleMention);
             }
         });
+
 
         // Create an embed message
         const embed = new EmbedBuilder()
