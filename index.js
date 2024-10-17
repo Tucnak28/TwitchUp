@@ -874,14 +874,12 @@ function selectMainIRCClient() {
                     }
                 }*/
 
-                //Method for mentioning using the names
-                // Split the message into words and check if any of them match active usernames (with or without '@')
-                const words = message.split(/\s+/); // Split message into words based on spaces or multiple spaces
-
-                // Filter out active usernames from the message
-                const activeMentions = words
-                    .map(word => word.replace(/^@/, '').toLowerCase()) // Remove '@' if present and normalize to lowercase
-                    .filter(word => activeUsernames.has(word)); // Check if the word is an active username
+                // Method for mentioning using the names
+                // Check if any of the active usernames are included in the message (with or without '@')
+                const messageLowerCase = message.toLowerCase(); // Normalize the message to lowercase
+                const activeMentions = Array.from(activeUsernames).filter(username => 
+                    messageLowerCase.includes(`@${username}`) || messageLowerCase.includes(username)
+                );
 
                 if (activeMentions.length > 0) {
                     console.log('Mentioned active users:', activeMentions);
