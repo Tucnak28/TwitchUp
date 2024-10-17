@@ -311,7 +311,7 @@ th {
 }
 
 #nicknameListContainer {
-    max-height: 100vh; /* Set max height to 80% of viewport height */
+    max-height: 90vh; /* Set max height to 80% of viewport height */
     width: 100%;
     overflow-y: auto; /* Enable vertical scrolling */
 }
