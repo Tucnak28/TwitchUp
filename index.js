@@ -22,6 +22,11 @@ let connectedChannel = null;
 let desiredEnding = 0;
 let tipWord = "";
 
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    //process.exit(1); // Exit the process with a non-zero status
+});
+
 
 
 const PORT = process.argv[2] || 3069; // Default port is 3069
