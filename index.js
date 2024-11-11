@@ -20,6 +20,7 @@ let mainIrcClient = null;
 let connectedChannel = null;
 
 let desiredEnding = 0;
+let tipWord = "";
 
 
 
@@ -224,7 +225,7 @@ class TipBot {
         clearTimeout(this.tipDelayTimeout);
         clearTimeout(this.timer);
 
-        console.log('Starting tip combination timeout...');
+        console.log('Starting tip event...');
 
         if(discordIntegration) discord_TipStarted(connectedChannel);
 
@@ -251,7 +252,14 @@ class TipBot {
     
                 // Log the tip for the current account
                 console.log(`Tip for ${account.getUsername()}: ${tipToSend}`);
-                account.say(account.channels.toString(), tipToSend.toString());
+                
+                if (tipWord !== "") {
+                    // If tipWord is not empty, prepend it to the tip
+                    account.say(account.channels.toString(), `${tipWord} ${tipToSend}`);
+                } else {
+                    // If tipWord is empty, just send the tip
+                    account.say(account.channels.toString(), tipToSend.toString());
+                }
 
                 // Reset the perfectTip and tipAmounts array after logging the tip for each account
                 if (index === shuffledActiveAcc.length - 1) {
@@ -308,12 +316,6 @@ class TipBot {
         //this.tipAmounts.push(tipToSend); //remove this later, because the tip will be added automatically because the tip will be in chat
         return tipToSend;
     }
-    
-    
-    
-    
-    
-    
 
     resetTipAmounts() {
         console.log(this.tipAmounts);
@@ -371,14 +373,34 @@ class TipBot {
             return; // Exit the method
         }
     
+
         // Check if the trimmed message is a pure number
         const pureNumber = /^\d+$/.test(trimmedMessage);
+
+        const hasTipWord = message.includes(tipWord);
+
+        if (hasTipWord && tipWord != "") {
+            // Extract the first number (whole or float) from the message
+            const extractedNumber = message.match(/-?\d+(?:[\.,]\d+)?/);
+        
+            // If there's no match, return
+            if (!extractedNumber) return;
+        
+            // Convert the matched number to a float, replacing comma with dot for parsing
+            const wholeNumber = parseFloat(extractedNumber[0].replace(',', '.'));
+        
+            this.addTip(wholeNumber);
+            return;
+        }
     
-        if (pureNumber) {
-            // Convert the message to a number
-            const tipAmount = parseInt(trimmedMessage, 10);
-    
+        
+
+        if (tipWord == "" && pureNumber) {
+            // Convert the trimmed message to a float, supporting commas as decimal separators
+            const tipAmount = parseFloat(trimmedMessage.replace(',', '.'));
+        
             this.addTip(tipAmount);
+            return;
         }
     }
 
@@ -664,6 +686,14 @@ app.post('/changeDesiredEnding', (req, res) => {
 
     res.status(200).end();
 });
+
+app.post('/changetipWord', (req, res) => {
+    tipWord = req.body.tipWord;
+
+    res.status(200).end();
+});
+
+
 
 
 app.post('/connectWordCounters', (req, res) => {

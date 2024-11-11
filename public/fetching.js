@@ -198,13 +198,19 @@ const intervalId = setInterval(checkConnections, 1000);
 // clearInterval(intervalId);
 
 
+
 // Attach the event listener on DOMContentLoaded or after the document is ready
 document.addEventListener('DOMContentLoaded', function() {
     const desiredEndingInput = document.getElementById('desiredEndingInput');
+    const tipWordInput = document.getElementById('tipWordInput');
 
     desiredEndingInput.addEventListener('input', function() {
         // Function to execute on every change
         onDesiredEndingChange();
+    });
+
+    tipWordInput.addEventListener('input', function() {
+        onTipWordChange();
     });
 });
 
@@ -232,4 +238,31 @@ function onDesiredEndingChange() {
         console.error('Error changing Desired Ending:', error);
     });
 }
+
+function onTipWordChange() {
+    const tipWordInput = document.getElementById('tipWordInput');
+    const tipWord = tipWordInput.value || "";
+
+    // Send the tipWord as a JSON object
+    fetch('/changeTipWord', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ tipWord: tipWord }) // Send the tipWord as JSON
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log('Tip word changed successfully');
+        } else {
+            console.error('Failed to change Tip Word');
+            throw new Error('Failed to change Tip Word');
+        }
+    })
+    .catch(error => {
+        console.error('Error changing Tip Word:', error);
+    });
+}
+
+
 
