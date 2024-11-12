@@ -80,7 +80,8 @@ node index.js 3069 True True
     {
         "nickname": "exampleUser2",
         "token": "oauth:exampleToken2"
-    }]
+    }
+  ]
 
 - Set up word detection rules through the web interface
 - Customize TipBot settings via the UI
