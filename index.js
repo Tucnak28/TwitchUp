@@ -17,6 +17,8 @@ app.use(bodyParser.json());
 const wss = new WebSocket.Server({ server: http });
 
 let mainIrcClient = null;
+let mainIrcInitialized = false;
+
 let connectedChannel = null;
 
 let desiredEnding = 0;
@@ -854,75 +856,81 @@ function selectMainIRCClient() {
             });
 
 
-            // Broadcast messages from Twitch IRC to all connected clients
-            mainIrcClient.on('message', (channel, tags, message, self) => {
-                // Ignore echoed messages.
-                //if(self) return;
 
-                //console.log(message);
-                //console.log(wss.clients);
+            if(!mainIrcInitialized) {
+                // Broadcast messages from Twitch IRC to all connected clients
+                mainIrcClient.on('message', (channel, tags, message, self) => {
+                    // Ignore echoed messages.
+                    //if(self) return;
 
-                wss.clients.forEach(wsClient => {
-                    if (wsClient.readyState === WebSocket.OPEN) {
-                        console.log('Sending message to client:', message);
-                        wsClient.send(JSON.stringify({ channel, tags, message }));
-                    }
-                });  
+                    //console.log(message);
+                    //console.log(wss.clients);
 
-                const activeUsernames = new Set(activeAcc.map(ircClient => ircClient.getUsername()));
-
-                // Check if the channel is not in activeAcc
-                if (!activeUsernames.has(tags['display-name'])) {
-                    activeAcc.forEach(ircClient => {
-                        // Check if ircClient and ircClient.wordCounters are defined and wordCounters is an array
-                        if (ircClient && Array.isArray(ircClient.wordCounters)) {
-                            // Iterate over each word counter within the current active account
-                            ircClient.wordCounters.forEach(wordCounter => {
-                                // Check if wordCounter is defined
-                                if (wordCounter) {
-                                    // Process the word using the current word counter
-                                    wordCounter.processWord(message);
-                                }
-                            });
+                    wss.clients.forEach(wsClient => {
+                        if (wsClient.readyState === WebSocket.OPEN) {
+                            console.log('Sending message to client:', message);
+                            wsClient.send(JSON.stringify({ channel, tags, message }));
                         }
-                    });
-                }
+                    });  
 
-                tipBot.processMessage(message);
-                
-                if(GPTIntegration) {
-                    gptBot.addMessage(tags['display-name'], message)
-                }
+                    const activeUsernames = new Set(activeAcc.map(ircClient => ircClient.getUsername()));
 
-                //Method for @ mentioning
-                // Extract mentioned usernames from the message
-                /*const mentions = message.match(/@(\w+)/g);
-                if (mentions) {
-                    const mentionedUsers = mentions.map(mention => mention.slice(1).toLowerCase()); // Remove the '@' character
+                    // Check if the channel is not in activeAcc
+                    if (!activeUsernames.has(tags['display-name'])) {
+                        activeAcc.forEach(ircClient => {
+                            // Check if ircClient and ircClient.wordCounters are defined and wordCounters is an array
+                            if (ircClient && Array.isArray(ircClient.wordCounters)) {
+                                // Iterate over each word counter within the current active account
+                                ircClient.wordCounters.forEach(wordCounter => {
+                                    // Check if wordCounter is defined
+                                    if (wordCounter) {
+                                        // Process the word using the current word counter
+                                        wordCounter.processWord(message);
+                                    }
+                                });
+                            }
+                        });
+                    }
+
+                    tipBot.processMessage(message);
                     
-                    // Filter out active usernames from mentioned users
-                    const activeMentions = mentionedUsers.filter(user => activeUsernames.has(user));
-                    
+                    if(GPTIntegration) {
+                        gptBot.addMessage(tags['display-name'], message)
+                    }
+
+                    //Method for @ mentioning
+                    // Extract mentioned usernames from the message
+                    /*const mentions = message.match(/@(\w+)/g);
+                    if (mentions) {
+                        const mentionedUsers = mentions.map(mention => mention.slice(1).toLowerCase()); // Remove the '@' character
+                        
+                        // Filter out active usernames from mentioned users
+                        const activeMentions = mentionedUsers.filter(user => activeUsernames.has(user));
+                        
+                        if (activeMentions.length > 0) {
+                            console.log('Mentioned active users:', activeMentions);
+                            if(discordIntegration) discord_Mention(channel, message, tags['display-name'], activeMentions);
+                        }
+                    }*/
+
+                    // Method for mentioning using the names
+                    // Check if any of the active usernames are included in the message (with or without '@')
+                    const messageLowerCase = message.toLowerCase(); // Normalize the message to lowercase
+                    const activeMentions = Array.from(activeUsernames).filter(username => 
+                        messageLowerCase.includes(`@${username}`) || messageLowerCase.includes(username)
+                    );
+
                     if (activeMentions.length > 0) {
                         console.log('Mentioned active users:', activeMentions);
-                        if(discordIntegration) discord_Mention(channel, message, tags['display-name'], activeMentions);
+                        if (discordIntegration) {
+                            console.log("discord Mention");
+                            discord_Mention(channel, message, tags['display-name'], activeMentions);
+                        }
                     }
-                }*/
+                });
 
-                // Method for mentioning using the names
-                // Check if any of the active usernames are included in the message (with or without '@')
-                const messageLowerCase = message.toLowerCase(); // Normalize the message to lowercase
-                const activeMentions = Array.from(activeUsernames).filter(username => 
-                    messageLowerCase.includes(`@${username}`) || messageLowerCase.includes(username)
-                );
-
-                if (activeMentions.length > 0) {
-                    console.log('Mentioned active users:', activeMentions);
-                    if (discordIntegration) {
-                        discord_Mention(channel, message, tags['display-name'], activeMentions);
-                    }
-                }
-            })
+                mainIrcInitialized = true;
+            }
 
             return;
         }
