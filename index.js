@@ -3,14 +3,12 @@ const app = express();
 const http = require('http').Server(app);
 const tmi = require('tmi.js');
 const WebSocket = require('ws');
-const fs = require('fs'); // Import the 'fs' module to read the JSON file
+const fs = require('fs');
 const bodyParser = require('body-parser'); // Import bodyParser module
 const { randomInt } = require('crypto');
 
-//To load environment variables
 require('dotenv').config();
 
-// Serve static files from the 'public' directory
 app.use(express.static('public'));
 app.use(bodyParser.json());
 
@@ -26,7 +24,6 @@ let tipWord = "";
 
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-    //process.exit(1); // Exit the process with a non-zero status
 });
 
 
@@ -39,8 +36,8 @@ http.listen(PORT, () => {
 });
 
 
-const discordIntegration = process.argv[3] == "True"; // Assuming the value is passed as a string "true" or "false"
-const GPTIntegration = process.argv[4] == "True"; // Assuming the value is passed as a string "true" or "false"
+const discordIntegration = process.argv[3] == "True";
+const GPTIntegration = process.argv[4] == "True";
 
 let discord_Mention, discord_TipStarted;
 
@@ -94,7 +91,6 @@ class WordCounter {
     incrementCounter() {
         this.counter++;
 
-        // Check if the threshold is reached
         if (this.counter >= this.threshold && !this.isOnCooldown) {
             this.triggerAction();
         }
@@ -103,48 +99,38 @@ class WordCounter {
     triggerAction() {
         console.log(`"${this.ircClient.getUsername()}: ${this.word_detect}"`);
 
-        let rndRepeat = this.repeat; // Default value if repeat is not -1
+        let rndRepeat = this.repeat;
 
         if (this.repeat == -1) {
-            rndRepeat = randomInt(1, 8); // Assign random value if repeat is -1
+            rndRepeat = randomInt(1, 8);
         }
 
         const textToSend = concatenateString(this.word_write, rndRepeat);
 
-        // Start cooldown period
         this.isOnCooldown = true;
 
-        // Wait for the specified time before sending the message
         setTimeout(() => {
-            // Send the message to the IRC client's channels
             this.ircClient.say(this.ircClient.channels.toString(), textToSend);
 
             setTimeout(() => {
-                //console.log('Cooldown period ended.');
                 this.isOnCooldown = false;
             }, this.cooldown);
         }, this.wait);
 
 
-        
-
-        // Perform the action here, e.g., write the word
         this.resetCounter();
     }
 
     resetCounter() {
         this.counter = 0;
         clearTimeout(this.timer);
-        // Set a timer to reset the counter after the time window
         this.timer = setTimeout(() => {
             this.counter = 0;
         }, this.timeWindow);
     }
 
     processWord(inputWord) {
-        // Check if the input word matches the target word
         if (inputWord.includes(this.word_detect) && !this.isOnCooldown) {
-            // Increment the counter and reset timer
             this.incrementCounter();
             clearTimeout(this.timer);
             this.timer = setTimeout(() => {
@@ -228,7 +214,6 @@ class TipBot {
 
     processTips() {
         this.eventRunning = true;
-        // Clear any existing tip combination timeout
         clearTimeout(this.tipDelayTimeout);
         clearTimeout(this.timer);
 
@@ -244,9 +229,7 @@ class TipBot {
     }
 
     sendTips() {    
-        // Shuffle the activeAcc array before looping through it
         const shuffledActiveAcc = shuffleArray(activeTipbotAccounts);
-        // Loop through each active account
         shuffledActiveAcc.forEach((account, index) => {
             setTimeout(() => {
                 if(!this.eventRunning) return;
@@ -254,25 +237,20 @@ class TipBot {
 
                 this.perfectTip = this.calculateMedian(this.tipAmounts);
 
-                // Calculate the tip for the current account
                 let tipToSend = this.calculateUniqueTip();
     
-                // Log the tip for the current account
                 console.log(`Tip for ${account.getUsername()}: ${tipToSend}`);
                 
                 if (tipWord !== "") {
-                    // If tipWord is not empty, prepend it to the tip
                     account.say(account.channels.toString(), `${tipWord} ${tipToSend}`);
                 } else {
-                    // If tipWord is empty, just send the tip
                     account.say(account.channels.toString(), tipToSend.toString());
                 }
 
-                // Reset the perfectTip and tipAmounts array after logging the tip for each account
                 if (index === shuffledActiveAcc.length - 1) {
                     console.log("All account sent their tips");
                 }
-            }, index * (this.sendTimeWindow / activeAcc.length)); // Delay each iteration by the appropriate amount of time
+            }, index * (this.sendTimeWindow / activeAcc.length));
         });
 
         this.startEventTimer();
@@ -282,17 +260,14 @@ class TipBot {
         let tipToSend = Math.round(this.perfectTip / 10) * 10;
         
         // Gradually increase the percentage around 30% of the roundedPerfectTip
-        let percent = this.tipRangePercentage; // Initial percentage
-        const step = 0.5; // Step to increase the percentage
-        const maxPercent = 100; // Maximum percentage
+        let percent = this.tipRangePercentage;
+        const step = 0.5;
+        const maxPercent = 100;
         
-        // Loop until a unique tip is generated or maximum percentage is reached
         while (true) {
-            // Calculate the range based on the current percentage
             const min = Math.max(0, Math.round(this.perfectTip * (1 - percent)));
             const max = Math.round(this.perfectTip * (1 + percent));
         
-            // Generate a random tip within the range
             tipToSend = Math.floor(Math.random() * (max - min + 1)) + min;
 
 
@@ -304,19 +279,15 @@ class TipBot {
                 tipToSend = Math.floor(tipToSend / 10) * 10 + desiredEnding;
             }
 
-    
-            // Check if the tip is not already in the tipAmounts array and not in the blacklistedTips array
             if (!this.tipAmounts.includes(tipToSend) && !this.blacklistedTips.includes(tipToSend)) {
-                break; // Exit the loop since a unique tip is found
+                break;
             }
     
-            // Increase the percentage for the next iteration
             percent += step;
         
-            // Check if maximum percentage is reached
             if (percent >= maxPercent) {
                 console.log("Maximum percentage reached. Cannot find a unique tip.");
-                break; // Exit the loop since maximum percentage is reached
+                break;
             }
         }
     
@@ -351,18 +322,15 @@ class TipBot {
     }
 
     startCooldown() {
-        // Set isOnCooldown to true
         this.isOnCooldown = true;
 
         console.log(`Starting ${this.cooldownDuration/1000} seconds cooldown`);
     
-        // Set a timeout to reset isOnCooldown after three minutes
         setTimeout(() => {
-            // Reset isOnCooldown to false after three minutes
             this.isOnCooldown = false;
             console.log('Cooldown ended. isOnCooldown set to false.');
             this.resetTipAmounts();
-        }, this.cooldownDuration); // Three minutes in milliseconds
+        }, this.cooldownDuration);
     }
 
     processMessage(message) {
@@ -371,17 +339,14 @@ class TipBot {
 
         // Check if the message contains "stop"
         if (this.stopWords.some(word => trimmedMessage.includes(word)) && this.eventRunning) {
-            // Set eventRunning to false to stop the event
             
             console.log('Event stopped due to "stop" message.');
 
             this.resetTipAmounts();
             this.startCooldown();
-            return; // Exit the method
+            return;
         }
     
-
-        // Check if the trimmed message is a pure number
         const pureNumber = /^\d+$/.test(trimmedMessage);
 
         const hasTipWord = message.includes(tipWord);
@@ -390,10 +355,8 @@ class TipBot {
             // Extract the first number (whole or float) from the message
             const extractedNumber = message.match(/-?\d+(?:[\.,]\d+)?/);
         
-            // If there's no match, return
             if (!extractedNumber) return;
         
-            // Convert the matched number to a float, replacing comma with dot for parsing
             const wholeNumber = parseFloat(extractedNumber[0].replace(',', '.'));
         
             this.addTip(wholeNumber);
@@ -403,7 +366,6 @@ class TipBot {
         
 
         if (tipWord == "" && pureNumber) {
-            // Convert the trimmed message to a float, supporting commas as decimal separators
             const tipAmount = parseFloat(trimmedMessage.replace(',', '.'));
         
             this.addTip(tipAmount);
@@ -412,32 +374,29 @@ class TipBot {
     }
 
     startEventTimer() {
-        // Set a timeout to stop the event after two minutes
         setTimeout(() => {
             if (!this.eventRunning) {
-                return; // Event already stopped
+                return;
             }
             
             console.log('Stopping the event.');
             this.resetTipAmounts();
             this.startCooldown();
-        }, this.eventDuration); // Two minutes in milliseconds
+        }, this.eventDuration);
     }
     
 
     addTip(amount) {
         if(this.isOnCooldown) return;
 
-		// Check if the received amount is already in the array or is blacklisted
 		if (this.tipAmounts.includes(amount) || this.blacklistedTips.includes(amount)) {
 			console.log('Tip amount already received or blacklisted:', amount);
-			return; // Exit the function if the amount is already in the array or blacklisted
+			return;
 		}
 
 
 
         console.log('Received tip amount:', amount);
-        // Add tip amount to the array
         this.tipAmounts.push(amount);
 
         clearTimeout(this.timer);
@@ -498,34 +457,27 @@ app.post('/sendMessage', (req, res) => {
         return res.status(400).send('Invalid request: Missing nickname or message');
     }
 
-    // Find the IRC client corresponding to the provided nickname
     const ircClient = activeAcc.find(account => account.getUsername().toLowerCase() === nickname.toLowerCase());
 
     if (!ircClient) {
-        // If the IRC client doesn't exist, send a 404 response to the client
         console.log(`Account "${nickname}" not found. Message not sent.`);
         return res.status(404).send("Account not found");
     }
 
     //console.log(`Received message from client for account "${nickname}": ${message}`);
 
-    // Flag to track whether a notice was received
     let noticeReceived = '';
 
-    // Listen for notices from the IRC client
     ircClient.once('notice', (channel, tags, noticeMessage) => {
-        // When a notice is received, set the flag and do not send a response
         noticeReceived = noticeMessage;
     });
 
     // Send the message to the IRC client's channels
     ircClient.say(ircClient.channels.toString(), message);
 
-    // Send a success response back to the client
     //console.log(`Message sent to account "${nickname}" successfully.`);
     
 
-    // After sending the response, if a notice was received, send it as a separate response
     setTimeout(() => {
         if (noticeReceived != '') {
             res.status(300).send(noticeReceived);
@@ -544,9 +496,8 @@ app.get('/loadConfigs', (req, res) => {
 
 
 app.post('/saveConfigs', (req, res) => {
-    const updatedAccounts = req.body; // Assuming the client sends the updated accounts as JSON
+    const updatedAccounts = req.body;
 
-    // Write the updated accounts back into the JSON file
     fs.writeFile('accounts.json', JSON.stringify(updatedAccounts), (err) => {
         if (err) {
             console.error('Error saving accounts:', err);
@@ -563,19 +514,15 @@ app.post('/saveConfigs', (req, res) => {
 app.post('/toggleConnection/:accountId', (req, res) => {
     const accountId = req.params;
 
-    // Check if the account is already connected
     const existingAccountIndex = activeAcc.findIndex(account => account.getUsername().toLowerCase() === accountId.accountId.toLowerCase());
 
     if (existingAccountIndex !== -1) {
         const existingAccount = activeAcc[existingAccountIndex];
         
-        // Disconnect the existing account
         existingAccount.disconnect();
 
-        // Remove the disconnected account from activeAcc array
         activeAcc.splice(existingAccountIndex, 1);
 
-        // Log and send response
         //console.log(`Account ${existingAccount.getUsername()} disconnected`);
         
         res.send("Disconnected");
@@ -583,15 +530,13 @@ app.post('/toggleConnection/:accountId', (req, res) => {
     }
 
 
-    // If account is not already connected, connect it
     const account = ircConfigs.find(config => config.nickname === accountId.accountId);
     if (!account) {
         console.error(`Account ${accountId.accountId} not found`);
-        res.sendStatus(404); // Account not found
+        res.sendStatus(404);
         return;
     }
 
-    // Connect the new account
     const accountClient = new tmi.Client({
         options: { debug: false },
         connection: {
@@ -605,7 +550,6 @@ app.post('/toggleConnection/:accountId', (req, res) => {
         channels: [connectedChannel]
     });
 
-    // Create and attach wordCounter object to the accountClient
     //accountClient.wordCounter = new WordCounter('example', 3, 15000, 0, accountClient);
 
     accountClient.connect();
@@ -614,7 +558,6 @@ app.post('/toggleConnection/:accountId', (req, res) => {
         console.log(`Account ${accountClient.getUsername()} connected`);
         activeAcc.push(accountClient);
 
-        // Send a success response
         res.send("Connected");
 
         if(mainIrcClient == null) selectMainIRCClient();
@@ -630,43 +573,34 @@ app.post('/toggleConnection/:accountId', (req, res) => {
 
 });
 
-// Endpoint to periodically check the connection status of accounts
 app.get('/checkConnections', (req, res) => {
-    // Iterate over each account in activeAcc array
     activeAcc.forEach((account, index) => {
-        // Check the connection status of the account
         if (!account || account.readyState() == 'CLOSED') {
-            // If account is not connected, remove it from activeAcc array
             activeAcc.splice(index, 1);
             console.log("removed: " + account.getUsername());
         }
     });
 
 
-    // Create an array of connected accounts
     const connectedAccounts = activeAcc.map(account => ({
         id: account.getUsername(),
     }));
 
-    // Send the array of connected accounts as JSON response
     res.json(connectedAccounts);
 });
 
 
 app.post('/reconnectAccounts', async (req, res) => {
-    const { channel } = req.body; // Extract the channel from the request body
+    const { channel } = req.body;
 
     connectedChannel = channel;
 
-    // Reconnect all accounts to the specified channel
     const results = await Promise.all(activeAcc.map(async (account) => {
         try {
-            // Leave every channel it is joined in
             await Promise.all(account.getChannels().map(async (joinedChannel) => {
                 await account.part(joinedChannel);
             }));
 
-            // Join the specified channel
             await account.join(channel);
             console.log(`Successfully joined channel: ${channel} for account: ${account.getUsername()}`);
             return { account: account.getUsername(), status: 'Connected' };
@@ -676,7 +610,6 @@ app.post('/reconnectAccounts', async (req, res) => {
         }
     }));
 
-    // Check if all accounts were connected successfully
     const allConnected = results.every(result => result.status === 'Connected');
 
     if (allConnected) {
@@ -687,7 +620,6 @@ app.post('/reconnectAccounts', async (req, res) => {
 });
 
 
-// Route to handle the POST request
 app.post('/changeDesiredEnding', (req, res) => {
     desiredEnding = req.body.desiredEnding;
 
@@ -704,7 +636,6 @@ app.post('/changetipWord', (req, res) => {
 
 
 app.post('/connectWordCounters', (req, res) => {
-    // Extract the settings from the request body
     const wordCounters = req.body.word_counters;
 
     activeAcc.forEach(account => {
@@ -727,32 +658,25 @@ app.post('/connectWordCounters', (req, res) => {
         console.log('\n');*/
 
 
-        // Find the connected account
         const existingAccountIndex = activeAcc.findIndex(account => account.getUsername().toLowerCase() === nickname.toLowerCase());
 
         if (existingAccountIndex !== -1) {
             const account = activeAcc[existingAccountIndex];
 
-            // Create a new word counter object
             const newWordCounter = new WordCounter(word_detect, word_write, threshold, timeWindow, repeat, wait, cooldown, account);
 
-            // Push the new word counter to the wordCounters array of the account
             account.wordCounters.push(newWordCounter);
                       
             console.log(nickname + ": wordCounter Connected");
         }
     });
 
-    // Send a success response
     res.sendStatus(200).end();
 });
 
-// Endpoint to handle fetching word counters config for a specific account
 app.post('/fetchWordCountersConfig', (req, res) => {
-    // Extract the account ID or nickname from the request body
     const { accountToFind } = req.body;
 
-    // Read the word counters configuration file
     fs.readFile('wordCounters_config.json', 'utf8', (err, data) => {
         if (err) {
             console.error('Error reading word counters configuration file:', err);
@@ -761,15 +685,11 @@ app.post('/fetchWordCountersConfig', (req, res) => {
         }
 
         try {
-            // Parse the JSON data from the file
             const config = JSON.parse(data);
 
-            // Check if the account exists in the configuration
             if (config.accounts && config.accounts[accountToFind]) {
-                // Send the word counters configuration for the specified account
                 res.status(200).json(config.accounts[accountToFind].wordCounters);
             } else {
-                // Account not found, send a 204 No Content response
                 res.status(204).end();
             }
         } catch (error) {
@@ -782,19 +702,15 @@ app.post('/fetchWordCountersConfig', (req, res) => {
 
 
 app.post('/saveWordCounters', (req, res) => {
-    // Extract the settings from the request body
     const wordCounters = req.body.word_counters;
 
-    // Read the existing configuration file
     let config = {};
 
-    // If config.accounts is undefined or null, initialize it as an empty object
     if (!config.accounts) {
         config.accounts = {};
     }
 
 
-    // Truncate the existing configuration file
     try {
         fs.truncateSync('wordCounters_config.json');
     } catch (error) {
@@ -802,20 +718,16 @@ app.post('/saveWordCounters', (req, res) => {
     }
 
 
-    // Update the configuration with the new wordCounters settings
     wordCounters.forEach(counter => {
         const { nickname } = counter;
 
-        // Find the corresponding account in the configuration
         if (!config.accounts[nickname]) {
-            // If account not found, create it with an empty array for wordCounters
             config.accounts[nickname] = {
                 wordCounters: []
             };
         }
 
 
-        // Add the wordCounter settings under the wordCounters array of the account
         config.accounts[nickname].wordCounters.push({
             word_detect: counter.word_detect,
             word_write: counter.word_write,
@@ -827,14 +739,13 @@ app.post('/saveWordCounters', (req, res) => {
         });
     });
 
-    // Write the updated configuration back to the file
     fs.writeFile('wordCounters_config.json', JSON.stringify(config, null, 2), 'utf-8', (err) => {
         if (err) {
             console.error('Error writing config file:', err);
-            res.sendStatus(500); // Internal Server Error
+            res.sendStatus(500);
         } else {
             console.log('Word Counters settings saved successfully.');
-            res.sendStatus(200); // OK
+            res.sendStatus(200);
         }
     });
 });
@@ -842,15 +753,12 @@ app.post('/saveWordCounters', (req, res) => {
 
 // Function to select an active IRC client from activeAcc
 function selectMainIRCClient() {
-    // Loop through activeAcc to find an IRC client that is open
     for (let i = 0; i < activeAcc.length; i++) {
         if (activeAcc[i].readyState() == 'OPEN') {
-            // Set this IRC client as the main client for intercepting messages
             mainIrcClient = activeAcc[i];
             console.log(`Main IRC client selected: ${mainIrcClient.getUsername()}`);
 
 
-            // WebSocket event listener to monitor the state of the main IRC client
             mainIrcClient.once('disconnected', (reason) => {
                 selectMainIRCClient();
             });
@@ -858,7 +766,6 @@ function selectMainIRCClient() {
 
 
             if(!mainIrcInitialized) {
-                // Broadcast messages from Twitch IRC to all connected clients
                 mainIrcClient.on('message', (channel, tags, message, self) => {
                     // Ignore echoed messages.
                     //if(self) return;
